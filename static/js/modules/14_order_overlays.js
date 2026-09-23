@@ -329,7 +329,7 @@ function _elbBar() { return document.getElementById('elb-bar'); }
                 return;
             }
 
-            const ticketW = ticket.offsetWidth || 135;
+            const ticketW = (ticket && ticket.offsetWidth > 50) ? ticket.offsetWidth : 135;
             const outerRight = (rightPx || Math.max(0, window.innerWidth - rect.right + 82)) + ticketW + 8;
 
             tag.style.top = `${rect.top + y}px`;
@@ -412,14 +412,42 @@ function _elbBar() { return document.getElementById('elb-bar'); }
             const activeOuterTagIds = new Set();
             const baseRight = Math.max(0, window.innerWidth - rect.right + 82);
 
-            visibleItems.sort((a, b) => a.y - b.y);
+            visibleItems.sort((a, b) => (a.y - b.y) || String(a.posId).localeCompare(String(b.posId)));
+
+            function _measureItemWidth(item) {
+                const ticket = document.getElementById(`order-line-ticket-${item.posId}-${item.type.toLowerCase()}`);
+                const tag = item.type === 'ENTRY' ? document.getElementById(`order-line-outer-${item.posId}`) : null;
+
+                let w = (ticket && ticket.offsetWidth > 50) ? ticket.offsetWidth : 135;
+
+                if (item.type === 'ENTRY') {
+                    const hasTP = activePriceLines.some(l => l._meta && String(l._meta.posId) === String(item.posId) && l._meta.lineType === 'TP');
+                    const hasSL = activePriceLines.some(l => l._meta && String(l._meta.posId) === String(item.posId) && l._meta.lineType === 'SL');
+
+                    let tagW = 0;
+                    if (tag && tag.offsetWidth > 20 && tag.style.display !== 'none') {
+                        tagW = tag.offsetWidth;
+                    } else if (!hasTP && !hasSL) {
+                        tagW = 68; // both [TP] and [SL] buttons visible
+                    } else if (!hasTP || !hasSL) {
+                        tagW = 35; // single button visible
+                    }
+
+                    if (tagW > 0) {
+                        w += 8 + tagW;
+                    }
+                }
+                return w;
+            }
 
             const rightOffsets = new Map();
             for (let i = 0; i < visibleItems.length; i++) {
                 let offset = baseRight;
                 for (let j = 0; j < i; j++) {
                     if (Math.abs(visibleItems[i].y - visibleItems[j].y) < 24) {
-                        offset = Math.max(offset, (rightOffsets.get(visibleItems[j]) || baseRight) + 160);
+                        const prevWidth = _measureItemWidth(visibleItems[j]);
+                        const neededOffset = (rightOffsets.get(visibleItems[j]) || baseRight) + prevWidth + 12;
+                        offset = Math.max(offset, neededOffset);
                     }
                 }
                 rightOffsets.set(visibleItems[i], offset);

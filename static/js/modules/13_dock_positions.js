@@ -579,7 +579,7 @@ function getSymbolTickSpec(sym) {
         }
 
         // 1-Click Order Execution (Supports Market & Limit Orders for both Demo & Live Binance)
-        async function sendOrder(cmd, lot = 0.01, isLimit = false, limitPrice = null, tpPrice = null, slPrice = null) {
+        async function sendOrder(cmd, lot = 0.01, isLimit = false, limitPrice = null, tpPrice = null, slPrice = null, clientPrice = null) {
             playHapticTone(cmd);
             const btnAction = document.getElementById("btn-primary-action");
             if (btnAction) {
@@ -589,9 +589,15 @@ function getSymbolTickSpec(sym) {
 
             const isLive = currentActiveAccount === 'standard';
             const endpoint = isLive ? "/api/live/order" : "/api/order";
-            const liveCurrentPrice = (typeof lastKnownPrice !== 'undefined' && Number(lastKnownPrice) > 0)
-                ? Number(lastKnownPrice)
-                : ((typeof candles !== 'undefined' && candles.length) ? Number(candles[candles.length - 1].close) : null);
+            const liveCurrentPrice = (clientPrice && Number(clientPrice) > 0)
+                ? Number(clientPrice)
+                : ((typeof lastKnownPrice !== 'undefined' && Number(lastKnownPrice) > 0)
+                    ? Number(lastKnownPrice)
+                    : ((typeof currentCandle !== 'undefined' && currentCandle?.close)
+                        ? Number(currentCandle.close)
+                        : ((typeof cachedCandles !== 'undefined' && cachedCandles.length)
+                            ? Number(cachedCandles[cachedCandles.length - 1].close)
+                            : null)));
 
             try {
                 const res = await fetch(endpoint, {

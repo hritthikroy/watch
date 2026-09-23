@@ -1,8 +1,9 @@
 /**
  * Titan 6-Brain TradeW High-Speed Web Trading Terminal
- * Modular Master Bundle - Generated from static/js/modules/
+ * Modular Master Bundle
  */
 
+/* --- 01_shield.js --- */
 // ============================================================================
 // Module: 01_shield.js
 // ============================================================================
@@ -45,6 +46,7 @@ console.log = function(...args) {
 
 
 
+/* --- 02_state.js --- */
 // ============================================================================
 // Module: 02_state.js
 // ============================================================================
@@ -87,6 +89,7 @@ let currentSymbol = "BTCUSDT";
 
 
 
+/* --- 03_config.js --- */
 // ============================================================================
 // Module: 03_config.js
 // ============================================================================
@@ -409,6 +412,7 @@ function _showReconnectBanner(show) {
 
 
 
+/* --- 04_audio.js --- */
 // ============================================================================
 // Module: 04_audio.js
 // ============================================================================
@@ -475,6 +479,7 @@ function _showReconnectBanner(show) {
 
 
 
+/* --- 05_ticker_engine.js --- */
 // ============================================================================
 // Module: 05_ticker_engine.js
 // ============================================================================
@@ -533,6 +538,7 @@ function startRafTickerEngine() {
 
 
 
+/* --- 06_order_ticket.js --- */
 // ============================================================================
 // Module: 06_order_ticket.js
 // ============================================================================
@@ -1012,6 +1018,7 @@ function setLotPreset(val) {
 
 
 
+/* --- 07_theme_account.js --- */
 // ============================================================================
 // Module: 07_theme_account.js
 // ============================================================================
@@ -1191,6 +1198,7 @@ function toggleSelectAccountModal(event) {
 
 
 
+/* --- 08_chart_engine.js --- */
 // ============================================================================
 // Module: 08_chart_engine.js
 // ============================================================================
@@ -1243,7 +1251,7 @@ function executeSelectedOrder() {
                 }
             }
 
-            sendOrder(side, lot, isLimit, limitPrice, tpPrice, slPrice);
+            sendOrder(side, lot, isLimit, limitPrice, tpPrice, slPrice, price);
         }
 
         // Timeframe Switch
@@ -1768,6 +1776,7 @@ function executeSelectedOrder() {
 
 
 
+/* --- 09_websocket.js --- */
 // ============================================================================
 // Module: 09_websocket.js
 // ============================================================================
@@ -2336,6 +2345,7 @@ function initMultiPositionWebSocket() {
 
 
 
+/* --- 10_chart_candles.js --- */
 // ============================================================================
 // Module: 10_chart_candles.js
 // ============================================================================
@@ -2531,6 +2541,7 @@ function _clearActiveChartLines() {
 
 
 
+/* --- 11_order_lines.js --- */
 // ============================================================================
 // Module: 11_order_lines.js
 // ============================================================================
@@ -2747,6 +2758,7 @@ function updateOnChartOrderLines() {
 
 
 
+/* --- 12_watchlist.js --- */
 // ============================================================================
 // Module: 12_watchlist.js
 // ============================================================================
@@ -3101,6 +3113,7 @@ function switchSymbol(sym, btn, isManual = true) {
 
 
 
+/* --- 13_dock_positions.js --- */
 // ============================================================================
 // Module: 13_dock_positions.js
 // ============================================================================
@@ -3682,7 +3695,7 @@ function getSymbolTickSpec(sym) {
         }
 
         // 1-Click Order Execution (Supports Market & Limit Orders for both Demo & Live Binance)
-        async function sendOrder(cmd, lot = 0.01, isLimit = false, limitPrice = null, tpPrice = null, slPrice = null) {
+        async function sendOrder(cmd, lot = 0.01, isLimit = false, limitPrice = null, tpPrice = null, slPrice = null, clientPrice = null) {
             playHapticTone(cmd);
             const btnAction = document.getElementById("btn-primary-action");
             if (btnAction) {
@@ -3692,9 +3705,15 @@ function getSymbolTickSpec(sym) {
 
             const isLive = currentActiveAccount === 'standard';
             const endpoint = isLive ? "/api/live/order" : "/api/order";
-            const liveCurrentPrice = (typeof lastKnownPrice !== 'undefined' && Number(lastKnownPrice) > 0)
-                ? Number(lastKnownPrice)
-                : ((typeof candles !== 'undefined' && candles.length) ? Number(candles[candles.length - 1].close) : null);
+            const liveCurrentPrice = (clientPrice && Number(clientPrice) > 0)
+                ? Number(clientPrice)
+                : ((typeof lastKnownPrice !== 'undefined' && Number(lastKnownPrice) > 0)
+                    ? Number(lastKnownPrice)
+                    : ((typeof currentCandle !== 'undefined' && currentCandle?.close)
+                        ? Number(currentCandle.close)
+                        : ((typeof cachedCandles !== 'undefined' && cachedCandles.length)
+                            ? Number(cachedCandles[cachedCandles.length - 1].close)
+                            : null)));
 
             try {
                 const res = await fetch(endpoint, {
@@ -3790,6 +3809,7 @@ function getSymbolTickSpec(sym) {
 
 
 
+/* --- 14_order_overlays.js --- */
 // ============================================================================
 // Module: 14_order_overlays.js
 // ============================================================================
@@ -4121,7 +4141,7 @@ function _elbBar() { return document.getElementById('elb-bar'); }
                 return;
             }
 
-            const ticketW = ticket.offsetWidth || 135;
+            const ticketW = (ticket && ticket.offsetWidth > 50) ? ticket.offsetWidth : 135;
             const outerRight = (rightPx || Math.max(0, window.innerWidth - rect.right + 82)) + ticketW + 8;
 
             tag.style.top = `${rect.top + y}px`;
@@ -4204,14 +4224,42 @@ function _elbBar() { return document.getElementById('elb-bar'); }
             const activeOuterTagIds = new Set();
             const baseRight = Math.max(0, window.innerWidth - rect.right + 82);
 
-            visibleItems.sort((a, b) => a.y - b.y);
+            visibleItems.sort((a, b) => (a.y - b.y) || String(a.posId).localeCompare(String(b.posId)));
+
+            function _measureItemWidth(item) {
+                const ticket = document.getElementById(`order-line-ticket-${item.posId}-${item.type.toLowerCase()}`);
+                const tag = item.type === 'ENTRY' ? document.getElementById(`order-line-outer-${item.posId}`) : null;
+
+                let w = (ticket && ticket.offsetWidth > 50) ? ticket.offsetWidth : 135;
+
+                if (item.type === 'ENTRY') {
+                    const hasTP = activePriceLines.some(l => l._meta && String(l._meta.posId) === String(item.posId) && l._meta.lineType === 'TP');
+                    const hasSL = activePriceLines.some(l => l._meta && String(l._meta.posId) === String(item.posId) && l._meta.lineType === 'SL');
+
+                    let tagW = 0;
+                    if (tag && tag.offsetWidth > 20 && tag.style.display !== 'none') {
+                        tagW = tag.offsetWidth;
+                    } else if (!hasTP && !hasSL) {
+                        tagW = 68; // both [TP] and [SL] buttons visible
+                    } else if (!hasTP || !hasSL) {
+                        tagW = 35; // single button visible
+                    }
+
+                    if (tagW > 0) {
+                        w += 8 + tagW;
+                    }
+                }
+                return w;
+            }
 
             const rightOffsets = new Map();
             for (let i = 0; i < visibleItems.length; i++) {
                 let offset = baseRight;
                 for (let j = 0; j < i; j++) {
                     if (Math.abs(visibleItems[i].y - visibleItems[j].y) < 24) {
-                        offset = Math.max(offset, (rightOffsets.get(visibleItems[j]) || baseRight) + 160);
+                        const prevWidth = _measureItemWidth(visibleItems[j]);
+                        const neededOffset = (rightOffsets.get(visibleItems[j]) || baseRight) + prevWidth + 12;
+                        offset = Math.max(offset, neededOffset);
                     }
                 }
                 rightOffsets.set(visibleItems[i], offset);

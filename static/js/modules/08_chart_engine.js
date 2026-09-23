@@ -50,7 +50,7 @@ function executeSelectedOrder() {
                 }
             }
 
-            sendOrder(side, lot, isLimit, limitPrice, tpPrice, slPrice);
+            sendOrder(side, lot, isLimit, limitPrice, tpPrice, slPrice, price);
         }
 
         // Timeframe Switch

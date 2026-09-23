@@ -1,12 +1,2820 @@
-/**
- * TradeW Autonomous High-Speed Web Trading Terminal
- * Modular Index Stylesheet
- */
-@import url("./modules/variables.css");
-@import url("./modules/layout.css");
-@import url("./modules/watchlist.css");
-@import url("./modules/chart.css");
-@import url("./modules/ticket.css");
-@import url("./modules/dock.css");
-@import url("./modules/modals.css");
-@import url("./modules/responsive.css");
+/* --- variables.css --- */
+/* CSS Variables - DARK THEME (DEFAULT) */
+        :root {
+            --bg-main: #0B0E11;
+            --bg-card: #181A20;
+            --bg-card-alt: #1E2329;
+            --bg-dock: #141517;
+            --border-color: #2B313A;
+            --border-subtle: rgba(255, 255, 255, 0.05);
+            --binance-gold: #F0B90B;
+            --binance-green: #0ECB81;
+            --binance-red: #F6465D;
+            --text-primary: #EAECEF;
+            --text-secondary: #848E9C;
+            --text-muted: #5E6673;
+            --cyan-accent: #00F0FF;
+            --chart-bg: #181A20;
+            --chart-grid: rgba(255, 255, 255, 0.04);
+            --chart-text: #848E9C;
+            --chart-border: #2B313A;
+            --dock-header-bg: #181A20;
+            --hover-bg: rgba(255, 255, 255, 0.04);
+            --active-item-bg: rgba(240, 185, 11, 0.08);
+            --watermark-opacity: 0.04;
+        }
+
+        /* AESTHETIC EYE-FRIENDLY LIGHT THEME (Zero Glare, Soft Velvet Matte) */
+        body.theme-light {
+            --bg-main: #F0F2F5;
+            --bg-card: #FFFFFF;
+            --bg-card-alt: #F4F6F9;
+            --bg-dock: #F7F9FB;
+            --border-color: #E2E6ED;
+            --border-subtle: #EBEEF3;
+            --binance-gold: #D97706;
+            --binance-green: #00C076;
+            --binance-red: #EF5350;
+            --text-primary: #1E2329;
+            --text-secondary: #707A8A;
+            --text-muted: #929AA5;
+            --cyan-accent: #0284C7;
+            --chart-bg: #FFFFFF;
+            --chart-grid: rgba(0, 0, 0, 0.035);
+            --chart-text: #707A8A;
+            --chart-border: #E2E6ED;
+            --dock-header-bg: #F4F6F9;
+            --hover-bg: #EAEFF5;
+            --active-item-bg: rgba(240, 185, 11, 0.08);
+            --watermark-opacity: 0.04;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            height: 100vh;
+            max-height: 100vh;
+            overflow: hidden;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            user-select: none;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        /* &#9889; Nanosecond Tick Pulse Flashes */
+        @keyframes tickFlashUp {
+            0% { background-color: rgba(0, 255, 163, 0.45); }
+            100% { background-color: transparent; }
+        }
+        @keyframes tickFlashDown {
+            0% { background-color: rgba(239, 83, 80, 0.45); }
+            100% { background-color: transparent; }
+        }
+        .flash-tick-up {
+            animation: tickFlashUp 0.32s ease-out;
+        }
+        .flash-tick-down {
+            animation: tickFlashDown 0.32s ease-out;
+        }
+
+        /* &#9889; Nanosecond Telemetry Badge */
+        .nano-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.28);
+            padding: 2px 9px;
+            border-radius: 12px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: #00F0FF;
+            letter-spacing: 0.3px;
+            user-select: none;
+        }
+        .nano-pulse-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00FF88;
+            box-shadow: 0 0 8px #00FF88;
+            animation: nanoPulse 1.2s infinite alternate;
+        }
+        @keyframes nanoPulse {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            100% { transform: scale(1.3); opacity: 1; }
+        }
+
+        /* &#9889; Ultra-Nano Direct Stream Telemetry Badge (Hidden) */
+        .nano-stream-badge {
+            display: none;
+        }
+        .nano-stream-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00FF88;
+            box-shadow: 0 0 8px #00FF88;
+            animation: nanoPulse 1s infinite alternate;
+        }
+
+        /* Top Navigation Bar (48px fixed - 100% TradeW Match to media_1789955909263.png) */
+        .navbar {
+            height: 48px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 100;
+            gap: 16px;
+            box-sizing: border-box;
+            white-space: nowrap;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            gap: 18px;
+            flex-shrink: 0;
+        }
+        .tradew-brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: ns-resize;
+            touch-action: none;
+            user-select: none;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .tradew-brand-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            white-space: nowrap;
+        }
+        .nano-hud-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 192, 118, 0.12);
+            border: 1px solid rgba(0, 192, 118, 0.35);
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #00C076;
+            font-family: 'Roboto Mono', monospace;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .nano-hud-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00C076;
+            box-shadow: 0 0 6px #00C076;
+            animation: nanoPulse 1.2s infinite alternate;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .tradew-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            height: 100%;
+            flex-shrink: 0;
+        }
+        .tradew-nav-link {
+            color: #929AA5;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: grab;
+            transition: color 0.15s;
+            user-select: none;
+            white-space: nowrap;
+            height: 100%;
+            display: inline-flex;
+            align-items: center;
+            border-bottom: 2px solid transparent;
+            padding: 0 2px;
+            box-sizing: border-box;
+        }
+        .tradew-nav-link:hover {
+            color: var(--text-primary);
+        }
+        .tradew-nav-link.active {
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: 2px solid #00C076;
+        }
+        .tradew-btn-webtrader {
+            background: #00C076;
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s;
+            user-select: none;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+        }
+        .tradew-btn-webtrader:hover {
+            background: #00A666;
+        }
+        .tradew-nav-right-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            height: 100%;
+            flex-shrink: 0;
+        }
+        .tradew-nav-action-text {
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.15s;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .tradew-nav-action-text:hover {
+            color: #00C076;
+        }
+        .tradew-nav-icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.15s, background 0.15s;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .tradew-nav-icon-btn:hover {
+            color: var(--text-primary);
+            background: var(--hover-bg);
+        }
+        .tradew-user-avatar {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .tradew-user-avatar:hover {
+            transform: scale(1.08);
+        }
+
+        /* Nav Stats Badges */
+        .nav-stats { display: flex; align-items: center; gap: 10px; }
+        .nav-stat-pill {
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 4px 9px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .nav-stat-lbl { color: var(--text-secondary); text-transform: uppercase; font-size: 10px; }
+        .nav-stat-val { font-weight: 800; font-family: 'Roboto Mono', monospace; }
+
+        .nav-right { display: flex; align-items: center; gap: 8px; }
+        .rust-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            color: #FF5722;
+            font-weight: 800;
+            background: rgba(255,87,34,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,87,34,0.4);
+            font-family: 'Roboto Mono', monospace;
+        }
+        .heartbeat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--binance-green);
+            font-weight: 700;
+            background: rgba(14,203,129,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--binance-green);
+        }
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--binance-green);
+            border-radius: 50%;
+            box-shadow: 0 0 6px var(--binance-green);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.3); } 100% { opacity: 1; transform: scale(1); } }
+        
+        .btn-nav {
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-nav:hover { background: var(--hover-bg); border-color: var(--text-secondary); }
+        .btn-nav-theme {
+            font-weight: 700;
+            background: rgba(240,185,11,0.12);
+            color: var(--binance-gold);
+            border-color: var(--binance-gold);
+        }
+        .btn-nav-danger { background: rgba(246,70,93,0.15); color: var(--binance-red); border-color: var(--binance-red); }
+        .btn-nav-danger:hover { background: rgba(246,70,93,0.25); }
+
+
+
+/* --- layout.css --- */
+        /* 3-Column Tradewill Master Layout with Full-Width Bottom Dock */
+        .master-layout {
+            height: calc(100vh - 48px);
+            display: grid;
+            grid-template-columns: 330px 1fr 330px;
+            grid-template-rows: 1fr 290px;
+            overflow: hidden;
+            background: var(--bg-dock);
+            gap: 0;
+            transition: grid-template-rows 0.25s cubic-bezier(0.2, 0, 0, 1);
+        }
+        .master-layout.dock-expanded {
+            grid-template-rows: 1fr 420px;
+        }
+        .master-layout.dock-compact {
+            grid-template-rows: 1fr 200px;
+        }
+
+        /* COLUMN 1: Watchlist Sidebar */
+        .watchlist-col {
+            grid-column: 1;
+            grid-row: 1;
+            background: var(--bg-dock);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .watchlist-header {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-card);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .watchlist-tabs-row {
+            display: flex;
+            gap: 6px;
+        }
+
+
+/* --- watchlist.css --- */
+        /* Trade W Left Watchlist Styles (Matches Image 2) */
+        .tradew-search-bar {
+            height: 40px;
+            padding: 6px 10px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .tradew-search-input-box {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0 8px;
+            height: 28px;
+        }
+        .tradew-search-icon {
+            width: 13px;
+            height: 13px;
+            margin-right: 7px;
+            color: #7B8494;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 13px;
+        }
+        .tradew-search-icon svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+        .position-edit-icon {
+            color: #626C7B !important;
+            font: 700 15px/1 Arial, sans-serif;
+            cursor: pointer;
+            vertical-align: -1px;
+            transition: color 0.15s ease;
+        }
+        .position-edit-icon:hover { color: #9AA5B5 !important; }
+        .tradingview-mode-btn {
+            font-size: 11px;
+            padding: 3px 9px;
+            margin-left: 10px;
+            font-weight: 700;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .tradingview-mark {
+            color: #7B8494;
+            font: 800 9px/1 Arial, sans-serif;
+            letter-spacing: -0.5px;
+        }
+        .tradew-search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 11px;
+        }
+        .tradew-cat-carousel {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 4px;
+            height: 32px;
+        }
+        .tradew-arrow-btn {
+            background: transparent;
+            border: none;
+            color: #848E9C;
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .tradew-arrow-btn:hover { color: var(--text-primary); }
+        .tradew-cat-pills {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            flex: 1;
+            padding: 0 4px;
+        }
+        .tradew-cat-pills::-webkit-scrollbar { display: none; }
+        .tradew-cat-pill {
+            background: transparent;
+            border: none;
+            color: #848E9C;
+            font-size: 11.5px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 6px 0;
+            white-space: nowrap;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s ease;
+        }
+        .tradew-cat-pill.active {
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--text-primary);
+        }
+        .tradew-wl-header {
+            display: grid;
+            grid-template-columns: 1fr 80px 75px;
+            padding: 6px 12px;
+            background: var(--bg-card-alt);
+            color: #848E9C;
+            font-size: 11px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .tradew-wl-row {
+            display: grid;
+            grid-template-columns: 1fr 80px 75px;
+            align-items: center;
+            padding: 5px 12px;
+            border-bottom: 1px solid var(--border-subtle);
+            cursor: pointer;
+            transition: background 0.12s ease;
+            font-size: 12px;
+            min-height: 36px;
+        }
+        .tradew-wl-row:hover { background: var(--hover-bg); }
+        .tradew-wl-row.active {
+            background: rgba(255,255,255,0.05);
+        }
+        .tradew-wl-sym {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-primary);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            min-width: 0;
+        }
+        .tradew-star {
+            color: #596273;
+            cursor: pointer;
+            font-size: 13px;
+            flex-shrink: 0;
+            transition: color 0.15s ease, text-shadow 0.15s ease;
+        }
+        .tradew-star:hover { color: #D5A23B; }
+        .tradew-star.starred {
+            color: #F5B841;
+            text-shadow: 0 0 7px rgba(245,184,65,0.38);
+        }
+        .tradew-wl-price {
+            text-align: right;
+            font-family: 'Roboto Mono', monospace;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        .tradew-wl-chg {
+            text-align: right;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 700;
+        }
+
+
+
+/* --- chart.css --- */
+        /* COLUMN 2: Center Hero Column (Chart Stage) */
+        .center-stage {
+            grid-column: 2;
+            grid-row: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+            background: var(--chart-bg);
+        }
+
+        /* Top Sub-Header & Ticker Strip */
+        .stage-toolbar {
+            height: 40px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            flex-shrink: 0;
+            gap: 12px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .stage-toolbar::-webkit-scrollbar {
+            display: none;
+        }
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .stage-symbol-badge {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tf-pills { display: flex; gap: 2px; }
+        .tf-pill {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            padding: 3px 7px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .tf-pill:hover { color: var(--text-primary); background: var(--bg-card-alt); }
+        .tf-pill.active { background: var(--border-color); color: var(--text-primary); border-color: var(--text-secondary); }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 11px;
+        }
+        .stat-group { display: flex; flex-direction: column; line-height: 1.2; }
+        .stat-grp-lbl { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; }
+        .stat-grp-val { font-weight: 700; font-family: 'Roboto Mono', monospace; }
+        .hero-price { font-size: 14px; font-weight: 800; }
+
+        /* Chart Canvas Area */
+        .chart-stage-wrap {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+            background: var(--chart-bg);
+            overflow: hidden;
+        }
+        #tv-chart {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--chart-bg);
+            min-width: 400px;
+            min-height: 300px;
+        }
+        #tv-iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+            z-index: 2;
+        }
+
+        /* Binance Futures Web Iframe Container */
+        #binance-iframe-wrap {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+            z-index: 2;
+            background: #181A20;
+        }
+        #binance-iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #181A20;
+        }
+        .binance-iframe-bar {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: auto;
+        }
+        .binance-iframe-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(24, 26, 32, 0.9);
+            backdrop-filter: blur(4px);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .binance-tag {
+            color: #F0B90B;
+            font-size: 10px;
+            letter-spacing: 0.5px;
+        }
+        .binance-sym {
+            color: #EAECEF;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 800;
+        }
+        .binance-ext-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            background: rgba(240, 185, 11, 0.15);
+            border: 1px solid rgba(240, 185, 11, 0.4);
+            border-radius: 4px;
+            color: #F0B90B;
+            font-size: 11px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+        .binance-ext-btn:hover {
+            background: #F0B90B;
+            color: #000;
+        }
+
+        /* Multi-Chart Mode Selector */
+        .chart-view-modes {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 2px 3px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            margin-left: 6px;
+        }
+        .chart-mode-pill {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+        }
+        .chart-mode-pill:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .chart-mode-pill.active {
+            background: var(--border-color);
+            color: var(--text-primary);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        .chart-mode-pill.active#btn-mode-binance {
+            color: #F0B90B;
+            border-color: rgba(240, 185, 11, 0.35);
+            background: rgba(240, 185, 11, 0.12);
+        }
+
+        #chart-indicator-legend {
+            display: none !important;
+        }
+
+        /* When viewing iframe chart, hide all native overlay elements so there is zero overlap */
+        #chart-wrapper.iframe-mode .chart-watermark,
+        #chart-wrapper.iframe-mode #chart-indicator-legend,
+        #chart-wrapper.iframe-mode #tradew-chart-brand-badge,
+        #chart-wrapper.iframe-mode .tradew-lines-layer,
+        #chart-wrapper.iframe-mode .chart-high-low-overlay,
+        .chart-stage-wrap.iframe-mode .chart-watermark,
+        .chart-stage-wrap.iframe-mode #chart-indicator-legend,
+        .chart-stage-wrap.iframe-mode #tradew-chart-brand-badge,
+        .chart-stage-wrap.iframe-mode .tradew-lines-layer,
+        .chart-stage-wrap.iframe-mode .chart-high-low-overlay {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        /* Binance Center Watermark */
+        .chart-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+            opacity: var(--watermark-opacity);
+            z-index: 1;
+            user-select: none;
+        }
+        .chart-watermark svg { width: 140px; height: 140px; fill: var(--text-primary); }
+
+        /* On-Chart TradeW dashed order lines overlay */
+        .tradew-lines-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 50;
+            overflow: hidden;
+        }
+        .tradew-line-row {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            transform: translate3d(0, 0, 0) translateY(-50%);
+            pointer-events: none;
+            transition: none; /* ZERO BUFFERING / ZERO LAG */
+            will-change: transform;
+            contain: layout style;
+            height: 18px;
+        }
+        .tradew-badge-left {
+            pointer-events: auto;
+            cursor: pointer;
+            height: 18px;
+            box-sizing: border-box;
+            border-radius: 2px;
+            white-space: nowrap;
+            margin-left: 0; /* Flush to left edge like TradeW */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            user-select: none;
+            display: inline-flex;
+            align-items: stretch;
+            background: #FFFFFF;
+            border: 1px solid rgba(0,0,0,0.22);
+            overflow: hidden;
+        }
+        .tradew-tag-label {
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #FFFFFF;
+            letter-spacing: 0.1px;
+            white-space: nowrap;
+        }
+        .tradew-tag-val {
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            font-size: 10px;
+            font-weight: 600;
+            font-family: 'Roboto Mono', monospace;
+            color: #111827;
+            background: #FFFFFF;
+            white-space: nowrap;
+            border-left: 1px solid rgba(0,0,0,0.15);
+        }
+        .tradew-dashed-line {
+            flex: 1;
+            height: 0;
+            border-bottom: 1px dotted; /* Ultra-thin 1px hairline dotted line like TradeW */
+            margin: 0;
+            opacity: 0.88;
+        }
+        .tradew-badge-right {
+            pointer-events: auto;
+            font-size: 10px;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 700;
+            padding: 0 5px;
+            height: 18px;
+            line-height: 18px;
+            box-sizing: border-box;
+            border-radius: 2px;
+            margin-right: 0; /* Flush to right price axis */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            user-select: none;
+            letter-spacing: 0.2px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            color: #FFFFFF;
+        }
+
+
+
+/* --- ticket.css --- */
+        /* COLUMN 3: Right Sidebar (100% TradeW Fast Execution Order Ticket - Full Viewport Height) */
+        .sidebar-col {
+            grid-column: 3;
+            grid-row: 1 / -1; /* Spans full height from navbar to bottom of window! */
+            height: 100%;
+            background: var(--bg-card);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 10px 14px 20px 14px;
+            gap: 10px;
+        }
+        .sidebar-col::-webkit-scrollbar { width: 3px; }
+        .sidebar-col::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
+        .tradew-limit-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 4px;
+        }
+
+        /* Top Account Strip (Exact TradeW Reference Match) */
+        .tradew-top-account-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 4px;
+            cursor: pointer;
+            user-select: none;
+            transition: opacity 0.15s;
+        }
+        .tradew-top-account-bar:hover {
+            opacity: 0.92;
+        }
+        .tradew-account-badge {
+            background: #1877F2;
+            color: #FFFFFF;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 3px;
+            padding: 2px 6px;
+            margin-right: 6px;
+            letter-spacing: 0.2px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .tradew-account-id {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .tradew-chevron {
+            font-size: 9px;
+            color: var(--text-secondary);
+            transition: transform 0.2s;
+        }
+        .tradew-account-bal {
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'Roboto Mono', monospace;
+            color: var(--text-primary);
+            margin-right: 5px;
+        }
+        .tradew-account-pnl {
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'Roboto Mono', monospace;
+            color: #00C076;
+        }
+        .tradew-account-drop {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-left: 3px;
+            cursor: pointer;
+        }
+
+        /* TradeW Select Account Modal Dropdown (100% Match to media_1789955158818.png) */
+        .tradew-select-acct-dropdown {
+            position: absolute;
+            top: 44px;
+            left: 10px;
+            right: 10px;
+            background: #1E2024;
+            border: 1px solid #2B313A;
+            border-radius: 12px;
+            box-shadow: 0 16px 44px rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            padding: 16px;
+            display: none;
+            user-select: none;
+            animation: fadeInAcct 0.15s ease-out;
+        }
+        @keyframes fadeInAcct {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tradew-select-acct-dropdown.open {
+            display: block;
+        }
+        .tradew-modal-title-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 14px;
+        }
+        .tradew-info-circle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            border: 1.2px solid #848E9C;
+            color: #848E9C;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .tradew-acct-card {
+            position: relative;
+            background: #252830;
+            border: 1.5px solid #333842;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .tradew-acct-card.selected {
+            border-color: #00C076;
+        }
+        .tradew-acct-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tradew-acct-type-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+        .tradew-acct-id-tag {
+            border: 1px solid #4F5562;
+            border-radius: 3px;
+            padding: 1px 6px;
+            font-size: 11px;
+            font-family: 'Roboto Mono', monospace;
+            color: #969CA6;
+        }
+        .tradew-acct-card-bal {
+            font-size: 18px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-top: 5px;
+            font-family: 'Roboto Mono', monospace;
+        }
+        .tradew-acct-check {
+            position: absolute;
+            top: -1px;
+            right: -1px;
+            background: #00C076;
+            width: 22px;
+            height: 18px;
+            border-bottom-left-radius: 6px;
+            border-top-right-radius: 7px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .tradew-acct-card.selected .tradew-acct-check {
+            display: flex;
+        }
+        .tradew-acct-add-btn {
+            background: #252830;
+            border: 1px solid #333842;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            color: #EAECEF;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 14px;
+            transition: background 0.15s;
+        }
+        .tradew-acct-add-btn:hover {
+            background: #2B303A;
+        }
+        .tradew-acct-confirm-btn {
+            width: 100%;
+            background: #00C076;
+            color: #FFFFFF;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 11px 0;
+            border: none;
+            border-radius: 22px;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .tradew-acct-confirm-btn:hover {
+            background: #00B06C;
+        }
+        .tradew-acct-confirm-btn:active {
+            transform: scale(0.99);
+        }
+
+        /* Order Type Tabs (Market Order | Limit Order) */
+        .tradew-panel-tabs {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 6px;
+            margin-top: 2px;
+        }
+        .tradew-tab-group {
+            display: flex;
+            gap: 16px;
+            align-items: baseline;
+        }
+        .tradew-tab-item {
+            background: transparent;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 2px 0 6px 0;
+            position: relative;
+            transition: color 0.15s;
+        }
+        .tradew-tab-item.active {
+            color: var(--text-primary);
+        }
+        .tradew-tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -7px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 38px;
+            height: 2px;
+            background: var(--text-primary);
+            border-radius: 1px;
+        }
+        .tradew-tab-popup {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 2px;
+            transition: color 0.15s;
+        }
+        .tradew-tab-popup:hover { color: var(--text-primary); }
+
+        /* Dual Quote Card (Sell Box | Spread Pill | Buy Box) */
+        .tradew-quote-card-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 2px;
+        }
+        .hero-price-badge {
+            display: inline-flex;
+            align-items: center;
+            font-size: 15px;
+            font-weight: 800;
+            font-family: 'Roboto Mono', monospace;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: #00C076;
+            user-select: none;
+            letter-spacing: -0.2px;
+            transition: color 0.15s ease;
+        }
+        .hero-price-badge.up {
+            background: transparent;
+            color: #00C076;
+        }
+        .hero-price-badge.down {
+            background: transparent;
+            color: #EF5350;
+        }
+        .tradew-quote-box {
+            display: flex;
+            align-items: center;
+            position: relative;
+            background: var(--bg-card-alt);
+            border-radius: 6px;
+            height: 52px;
+            padding: 2px;
+            border: 1px solid var(--border-color);
+        }
+        .tradew-quote-card {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+            border-radius: 5px;
+            user-select: none;
+        }
+        .quote-sell {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .quote-sell .quote-card-lbl { font-size: 11px; font-weight: 600; color: #EF5350; margin-bottom: 1px; transition: color 0.2s; }
+        .quote-sell .quote-card-price { font-family: 'Roboto Mono', monospace; display: flex; align-items: baseline; color: #EF5350; transition: color 0.2s; }
+        .quote-sell .quote-p-prefix { font-size: 13px; font-weight: 600; }
+        .quote-sell .quote-p-suffix { font-size: 17px; font-weight: 800; }
+
+        .quote-sell.active {
+            background: #EF5350;
+        }
+        .quote-sell.active .quote-card-lbl { color: #FFFFFF; }
+        .quote-sell.active .quote-card-price { color: #FFFFFF; }
+        .quote-sell.active .quote-p-prefix { color: #FFFFFF; }
+        .quote-sell.active .quote-p-suffix { color: #FFFFFF; }
+
+        .quote-buy {
+            background: rgba(255, 255, 255, 0.03);
+            align-items: flex-end;
+        }
+        .quote-buy .quote-card-lbl { font-size: 11px; font-weight: 600; color: #00C076; margin-bottom: 1px; transition: color 0.2s; }
+        .quote-buy .quote-card-price { font-family: 'Roboto Mono', monospace; display: flex; align-items: baseline; justify-content: flex-end; color: #00C076; transition: color 0.2s; }
+        .quote-buy .quote-p-prefix { font-size: 13px; font-weight: 600; color: #008A54; }
+        .quote-buy .quote-p-suffix { font-size: 17px; font-weight: 800; color: #00C076; }
+
+        .quote-buy.active {
+            background: #00C076;
+        }
+        .quote-buy.active .quote-card-lbl { color: #FFFFFF; }
+        .quote-buy.active .quote-card-price { color: #FFFFFF; }
+        .quote-buy.active .quote-p-prefix { color: #FFFFFF; }
+        .quote-buy.active .quote-p-suffix { color: #FFFFFF; }
+
+        .tradew-spread-pill {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 10px;
+            font-weight: 700;
+            font-family: 'Roboto Mono', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* TradeW Signature Slanted Sentiment Meter */
+        .tradew-sentiment-container {
+            display: flex;
+            height: 18px;
+            border-radius: 3px;
+            overflow: hidden;
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-color);
+            margin-top: 4px;
+        }
+        .sentiment-seg-sell {
+            display: flex;
+            align-items: center;
+            background: rgba(239, 83, 80, 0.22);
+            color: #EF5350;
+            font-size: 10px;
+            font-weight: 700;
+            font-family: 'Roboto Mono', monospace;
+            padding-left: 6px;
+            clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+            width: 33%;
+            transition: width 0.3s;
+        }
+        .sentiment-seg-buy {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            background: rgba(0, 192, 118, 0.22);
+            color: #00C076;
+            font-size: 10px;
+            font-weight: 700;
+            font-family: 'Roboto Mono', monospace;
+            padding-right: 6px;
+            clip-path: polygon(6px 0, 100% 0, 100% 100%, 0 100%);
+            margin-left: -4px;
+            flex: 1;
+            transition: width 0.3s;
+        }
+
+        /* Vertical Stepper (TradeW Signature: Input Left, Vertical +/- Right) */
+        .tradew-stepper-box {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card-alt);
+            border-radius: 4px;
+            height: 40px;
+            position: relative;
+            border: 1px solid var(--border-color);
+            margin-top: 6px;
+        }
+        .stepper-main-val {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Roboto Mono', monospace;
+            padding-left: 12px;
+            outline: none;
+            flex: 1;
+        }
+        .stepper-lot-lbl {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 10px;
+            user-select: none;
+        }
+        .stepper-vert-actions {
+            width: 34px;
+            height: 100%;
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+        .btn-stepper-vert {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            user-select: none;
+        }
+        .btn-stepper-vert:first-child {
+            border-bottom: 1px solid var(--border-color);
+        }
+        .btn-stepper-vert:hover {
+            background: var(--hover-bg);
+            color: var(--text-primary);
+        }
+
+        /* 5 Quick Preset Pills (0.01, 0.10, 0.50, 1.00, 3.00) */
+        .tradew-lot-presets {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .lot-preset-btn {
+            flex: 1;
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 5px 0;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'Roboto Mono', monospace;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .lot-preset-btn:hover {
+            border-color: #00C076;
+            color: #00C076;
+        }
+        .lot-preset-btn.active {
+            background: rgba(0, 192, 118, 0.12);
+            color: #00C076;
+            border-color: #00C076;
+        }
+
+        /* Take Profit & Stop Loss Accordions (TradeW Dotted Underlines & iOS Toggles) */
+        .tradew-toggle-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        .toggle-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .toggle-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .toggle-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-primary);
+            border-bottom: 1px dashed var(--text-secondary);
+            padding-bottom: 1px;
+            cursor: help;
+        }
+        .toggle-cond-text {
+            font-size: 11px;
+            font-weight: 500;
+            font-family: 'Roboto Mono', monospace;
+            color: var(--text-secondary);
+        }
+        .ios-switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .ios-switch input { opacity: 0; width: 0; height: 0; }
+        .ios-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border-color);
+            transition: .2s;
+            border-radius: 18px;
+        }
+        .ios-slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .2s;
+            border-radius: 50%;
+        }
+        .ios-switch input:checked + .ios-slider {
+            background-color: #00C076;
+        }
+        .ios-switch input:checked + .ios-slider:before {
+            transform: translateX(16px);
+        }
+        .toggle-sub-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-family: 'Roboto Mono', monospace;
+            margin-top: 4px;
+        }
+        .mini-stepper {
+            height: 36px;
+            margin-top: 4px;
+        }
+
+        /* Large TradeW Primary Action Button */
+        .btn-tradew-main-action {
+            width: 100%;
+            height: 44px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #FFFFFF;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, transform 0.1s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            margin-top: 6px;
+        }
+        .btn-tradew-main-action:active { transform: scale(0.99); }
+        .btn-tradew-main-action.btn-buy {
+            background: #00C076;
+        }
+        .btn-tradew-main-action.btn-buy:hover { background: #00A666; }
+        .btn-tradew-main-action.btn-sell {
+            background: #EF5350;
+        }
+        .btn-tradew-main-action.btn-sell:hover { background: #D9383B; }
+        
+        .badge-action-demo {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            font-size: 9px;
+            font-weight: 800;
+            background: rgba(255,255,255,0.25);
+            color: #FFFFFF;
+            padding: 1px 4px;
+            border-radius: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Summary Footer (TradeW Authentic Natural Spacing - Direct Flow Under Button) */
+        .tradew-order-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-top: 18px;
+            padding-top: 2px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            padding: 1px 2px;
+        }
+        .summary-lbl {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 12px;
+        }
+        .summary-lbl.dashed {
+            border-bottom: 1px dashed var(--text-secondary);
+            padding-bottom: 1px;
+            cursor: help;
+        }
+        .summary-val {
+            font-weight: 700;
+            font-family: 'Roboto Mono', monospace;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+        .summary-expand-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            margin-top: 10px;
+            user-select: none;
+            transition: color 0.15s;
+        }
+        .summary-expand-row:hover { color: var(--text-primary); }
+        .expand-divider-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+            opacity: 0.7;
+        }
+        .expand-label-btn {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        /* Floating Support Headset Icon */
+        .tradew-floating-support {
+            position: fixed;
+            bottom: 14px;
+            right: 14px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #00C076;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 192, 118, 0.4);
+            cursor: pointer;
+            z-index: 999;
+            transition: transform 0.2s;
+        }
+        .tradew-floating-support:hover { transform: scale(1.08); }
+        .tradew-support-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #EF5350;
+            color: #FFFFFF;
+            font-size: 10px;
+            font-weight: 800;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--bg-primary);
+        }
+        .btn-dock-close-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card-alt);
+            color: var(--text-secondary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-dock-close-circle:hover {
+            background: #EF5350;
+            color: #FFFFFF;
+            border-color: #EF5350;
+        }
+
+        /* Helpers */
+        .val-gold { color: var(--binance-gold); }
+        .val-green { color: var(--binance-green); }
+        .val-red { color: var(--binance-red); }
+        .val-cyan { color: var(--cyan-accent); }
+        .val-gray { color: #848E9C; }
+
+        /* Complete Removal of Third-Party TV Watermark / Attribution Logo */
+        #tv-attr-logo, a#tv-attr-logo, #tv-chart a[href*="tradingview"], .tv-attr-logo, [id*="tv-attr"] {
+            display: none;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            width: 0;
+            height: 0;
+            margin: 0;
+            padding: 0;
+            position: absolute;
+            left: -9999px;
+        }
+
+        /* Trade W Authentic On-Chart Brand Badge (Matches media_1789956258807.png replacement) */
+        .tradew-chart-brand-badge {
+            position: absolute;
+            left: 14px;
+            bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 5;
+            pointer-events: none;
+            user-select: none;
+            opacity: 0.72;
+            transition: opacity 0.2s ease;
+        }
+        .tradew-chart-brand-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-secondary);
+            letter-spacing: 0.3px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* Trade W Top-Left Indicator Legend with Volume Eye Toggle */
+        .chart-indicator-legend {
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: auto;
+        }
+        .indicator-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(18, 20, 24, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 11px;
+            font-family: -apple-system, BlinkMacSystemFont, "Roboto Mono", monospace;
+            color: var(--text-secondary);
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+        body.theme-light .indicator-pill {
+            background: rgba(244, 246, 249, 0.88);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: #474D57;
+        }
+        .indicator-pill.hidden-state {
+            opacity: 0.4;
+        }
+        .indicator-pill.hidden-state .indicator-val {
+            text-decoration: none;
+            opacity: 0.4;
+        }
+        .indicator-title {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .indicator-val {
+            font-weight: 600;
+            color: #0ECB81;
+        }
+
+        /* Binance Official OHLC Bar Header */
+        .binance-ohlc-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-family: -apple-system, BlinkMacSystemFont, "Roboto Mono", "Segoe UI", sans-serif;
+            color: #848E9C;
+            user-select: none;
+            white-space: nowrap;
+            line-height: 1;
+            padding: 2px 0;
+        }
+        .binance-ohlc-bar .ohlc-date {
+            color: #848E9C;
+            margin-right: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+        .binance-ohlc-bar .ohlc-lbl {
+            color: #848E9C;
+            font-weight: 500;
+        }
+        .binance-ohlc-bar .ohlc-val {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            margin-right: 6px;
+        }
+        .binance-ohlc-bar .ohlc-val.up {
+            color: #0ECB81;
+        }
+        .binance-ohlc-bar .ohlc-val.down {
+            color: #F6465D;
+        }
+
+        /* Binance Official Moving Average (7, 25, 99) Legend */
+        .binance-ma-legend {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-family: -apple-system, BlinkMacSystemFont, "Roboto Mono", monospace;
+            font-weight: 600;
+            user-select: none;
+            line-height: 1;
+            padding: 2px 4px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        .binance-ma-legend.hidden-state {
+            opacity: 0.35;
+        }
+        .binance-ma-legend .ma-legend-item {
+            font-variant-numeric: tabular-nums;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .binance-ma-legend .indicator-eye-btn {
+            background: transparent;
+            border: none;
+            color: #848E9C;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 2px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .binance-ma-legend .indicator-eye-btn:hover {
+            color: #EAECEF;
+        }
+
+        /* Binance Live Candle Close Countdown Timer */
+        .binance-candle-timer {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 700;
+            color: #F0B90B;
+            background: rgba(240, 185, 11, 0.08);
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid rgba(240, 185, 11, 0.22);
+            user-select: none;
+            line-height: 1;
+        }
+        .binance-candle-timer .timer-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #F0B90B;
+            animation: pulseTimerDot 1.4s infinite ease-in-out;
+        }
+        @keyframes pulseTimerDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.35; transform: scale(0.75); }
+        }
+
+        /* High / Low Price Markers on Chart Canvas (Binance Parity) */
+        .chart-high-low-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 8;
+            overflow: hidden;
+        }
+        .binance-hl-marker {
+            position: absolute;
+            font-size: 11px;
+            font-family: -apple-system, BlinkMacSystemFont, "Roboto Mono", monospace;
+            font-weight: 600;
+            color: #848E9C;
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .binance-hl-marker .hl-pointer {
+            display: inline-block;
+            width: 14px;
+            height: 1px;
+            background: #848E9C;
+            opacity: 0.8;
+        }
+        .binance-hl-marker.high-marker {
+            transform: translate(-50%, -100%) translateY(-3px);
+        }
+        .binance-hl-marker.low-marker {
+            transform: translate(-50%, 0) translateY(3px);
+        }
+        .indicator-eye-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 3px;
+            border-radius: 3px;
+            transition: color 0.15s ease, transform 0.15s ease;
+        }
+        .indicator-eye-btn:hover {
+            color: #00C076;
+            transform: scale(1.15);
+        }
+        .indicator-eye-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* &#9472;&#9472; LIGHT THEME: Fully Color-Engineered Velvet Matte Aesthetic &#9472;&#9472; */
+        body.theme-light .navbar {
+            background: #FFFFFF;
+            border-bottom-color: var(--border-color);
+        }
+        body.theme-light .tradew-user-avatar {
+            background: var(--bg-card-alt);
+            border-color: var(--border-color);
+        }
+        body.theme-light .tradew-nav-link:hover {
+            color: var(--text-primary);
+        }
+        body.theme-light .tradew-nav-link.active {
+            color: var(--text-primary);
+            border-bottom-color: #00C076;
+        }
+
+        /* On-Chart Draggable Order Line Tickets (100% Match to media_1790152986935.png) */
+        .order-line-ticket {
+            position: fixed;
+            display: none;
+            z-index: 10002;
+            transform: translateY(-50%);
+            height: 22px;
+            line-height: 22px;
+            white-space: nowrap;
+            pointer-events: auto;
+            border-radius: 3px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+            align-items: center;
+            user-select: none;
+            transition: box-shadow 0.15s ease;
+        }
+        .order-line-ticket[data-line-type="SL"],
+        .order-line-ticket[data-line-type="TP"] {
+            cursor: grab;
+        }
+        .order-line-ticket[data-line-type="SL"]:active,
+        .order-line-ticket[data-line-type="TP"]:active,
+        .order-line-ticket.is-dragging {
+            cursor: grabbing !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+        }
+        .order-line-ticket-label {
+            display: inline-flex;
+            align-items: center;
+            height: 22px;
+            padding: 0 6px;
+            box-sizing: border-box;
+            color: #ffffff;
+            font: 700 11px/22px Arial, sans-serif;
+            letter-spacing: 0.2px;
+            background: transparent;
+        }
+        /* Outer Side Draggable Action Tag (TradeW / Binance Original Style) */
+        .order-line-outer-tag {
+            position: fixed;
+            display: none;
+            flex-direction: row;
+            align-items: center;
+            gap: 5px;
+            transform: translateY(-50%);
+            z-index: 10003;
+            pointer-events: auto;
+            user-select: none;
+            touch-action: none;
+        }
+        .order-line-outer-tag .elb-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 20px;
+            padding: 0 7px;
+            border-radius: 3px;
+            background: #181A20;
+            font: 800 11px/20px -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+            cursor: grab;
+            white-space: nowrap;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+            transition: all 0.15s ease;
+            touch-action: none;
+        }
+        .order-line-outer-tag .elb-btn-tp {
+            color: #00C076;
+            border: 1px solid rgba(0, 192, 118, 0.7);
+        }
+        .order-line-outer-tag .elb-btn-tp:hover,
+        .order-line-outer-tag .elb-btn-tp.is-dragging {
+            background: #00C076;
+            color: #121418;
+            cursor: grabbing;
+        }
+        .order-line-outer-tag .elb-btn-sl {
+            color: #F6465D;
+            border: 1px solid rgba(246, 70, 93, 0.7);
+        }
+        .order-line-outer-tag .elb-btn-sl:hover,
+        .order-line-outer-tag .elb-btn-sl.is-dragging {
+            background: #F6465D;
+            color: #FFFFFF;
+            cursor: grabbing;
+        }
+        .order-line-outer-tag .elb-btn.is-dragging {
+            opacity: 0.75;
+            cursor: grabbing !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+        }
+        .order-line-ticket-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 22px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #ffffff;
+            font: 700 14px/22px Arial, sans-serif;
+            cursor: pointer;
+            opacity: 0.85;
+            transition: opacity 0.15s ease;
+        }
+        .order-line-ticket-close:hover {
+            opacity: 1;
+            color: #ffffff;
+        }
+
+
+
+/* --- dock.css --- */
+        /* ðŸ›ï¸ TradeW Authentic Bottom Dock Section */
+        .tradew-dock {
+            grid-column: 1 / 3; /* Spans under watchlist and chart stage, ending flush at the right sidebar */
+            grid-row: 2;
+            height: 100%;
+            width: 100%;
+            background: var(--bg-dock);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 20;
+        }
+        .dock-tab-nav {
+            height: 38px;
+            background: var(--bg-dock);
+            border-bottom: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            flex-shrink: 0;
+        }
+        .dock-left-strip {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            gap: 12px;
+        }
+        .dock-sym-substrip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-primary);
+            padding-right: 6px;
+        }
+        .dock-star-btn {
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+        .dock-star-btn:hover { color: var(--binance-gold); }
+        .dock-v-sep {
+            width: 1px;
+            height: 18px;
+            background: var(--border-color);
+        }
+        .dock-tabs { display: flex; align-items: center; height: 100%; gap: 0; }
+        .dock-tab-btn {
+            height: 100%;
+            padding: 0 16px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #848E9C;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.15s;
+        }
+        .dock-tab-btn:hover { color: var(--text-primary); }
+        .dock-tab-btn.active {
+            color: var(--text-primary);
+            border-bottom: 2px solid #00C076;
+            font-weight: 700;
+            background: transparent;
+        }
+        .dock-badge-cnt {
+            display: none;
+        }
+        .dock-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Dock Layout Body: Left Wide Table + Right Summary Column */
+        .dock-layout-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            background: var(--bg-dock);
+            min-height: 0;
+        }
+        .dock-view-body {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            min-width: 0;
+            background: var(--bg-dock);
+        }
+        .dock-view-body::-webkit-scrollbar { width: 5px; height: 5px; }
+        .dock-view-body::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
+        /* TradeW Right Account Summary Widget (Matches Image 2) */
+        .dock-side-summary {
+            width: 180px;
+            flex-shrink: 0;
+            border-left: 1px solid var(--border-color);
+            background: var(--bg-dock);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 12px 14px;
+            position: relative;
+        }
+        .dock-summary-top {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .dock-summary-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+        }
+        .dock-summary-lbl {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .dock-summary-val {
+            font-weight: 800;
+            font-family: 'Roboto Mono', monospace;
+            color: var(--text-primary);
+        }
+        .dock-summary-divider {
+            height: 1px;
+            background: var(--border-subtle);
+            margin: 4px 0;
+        }
+        .btn-dock-expand {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 4px;
+            border-radius: 4px;
+            transition: 0.15s;
+        }
+        .btn-dock-expand:hover { color: var(--text-primary); background: var(--hover-bg); }
+        .dock-support-badge {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            cursor: pointer;
+            margin-top: auto;
+        }
+        .support-icon-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #0ECB81;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(14,203,129,0.3);
+            transition: transform 0.15s;
+        }
+        .support-icon-circle:hover { transform: scale(1.08); }
+        .support-notif-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 13px;
+            height: 13px;
+            background: #F6465D;
+            color: #FFFFFF;
+            font-size: 9px;
+            font-weight: 800;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--bg-dock);
+        }
+
+        /* Tables inside Dock */
+        .dock-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 11px;
+        }
+        .dock-table th {
+            background: var(--bg-dock);
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            white-space: nowrap;
+        }
+        .dock-table td {
+            padding: 9px 12px;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 11px;
+        }
+        .dock-table tbody tr:hover { background: var(--hover-bg); }
+        .dock-table tbody tr.row-focus { background: var(--active-item-bg); }
+
+        .tradew-badge-buy {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 800;
+            background: rgba(14, 203, 129, 0.18);
+            color: var(--binance-green);
+            border: 1px solid rgba(14, 203, 129, 0.4);
+        }
+        .tradew-badge-sell {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 800;
+            background: rgba(246, 70, 93, 0.18);
+            color: var(--binance-red);
+            border: 1px solid rgba(246, 70, 93, 0.4);
+        }
+
+        .btn-dock-sm {
+            padding: 3px 9px;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-dock-close {
+            border: 1px solid rgba(246,70,93,0.5);
+            background: rgba(246,70,93,0.15);
+            color: var(--binance-red);
+        }
+        .btn-dock-close:hover { background: var(--binance-red); color: #FFF; }
+        .btn-dock-be {
+            border: 1px solid rgba(240,185,11,0.4);
+            background: rgba(240,185,11,0.12);
+            color: var(--binance-gold);
+            margin-right: 4px;
+        }
+
+        /* TradeW Empty State Illustration (Matches Image 1) */
+        .tradew-empty-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 36px 0;
+            width: 100%;
+            color: var(--text-secondary);
+            user-select: none;
+        }
+
+        /* Brain & Vault Tabs Content */
+        .tab-grid-brain {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 10px;
+        }
+        .brain-mini-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--binance-gold);
+            border-radius: 6px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .brain-mini-title { font-size: 10px; color: var(--text-secondary); font-weight: 700; }
+        .brain-mini-metric { font-size: 12px; font-weight: 800; color: var(--binance-green); font-family: 'Roboto Mono', monospace; }
+
+        .tab-grid-vault {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 10px;
+        }
+        .vault-mini-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+        .vault-mini-lbl { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+        .vault-mini-val { font-size: 16px; font-weight: 800; font-family: 'Roboto Mono', monospace; }
+
+
+
+/* --- modals.css --- */
+        /* &#9472;&#9472; Trade W Stop Loss / Take Profit Floating Edit Modal (Matches Image 1) &#9472;&#9472; */
+        .sltp-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(3px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        .sltp-modal-card {
+            width: 380px;
+            background: #20242B;
+            border-radius: 10px;
+            border: 1px solid #2B313A;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85);
+            padding: 18px 20px 22px;
+            color: #FFFFFF;
+            user-select: none;
+            box-sizing: border-box;
+        }
+        .sltp-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 10px;
+        }
+        .sltp-header-left {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+        .sltp-modal-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+        .sltp-modal-constraint {
+            font-size: 13px;
+            color: #848E9C;
+            font-weight: 500;
+            font-family: 'Roboto Mono', monospace;
+        }
+        .sltp-modal-close {
+            background: transparent;
+            border: none;
+            color: #848E9C;
+            font-size: 16px;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .sltp-modal-close:hover { color: #FFFFFF; }
+        .sltp-stepper-box {
+            background: #2C313C;
+            border: 1px solid #363C48;
+            border-radius: 6px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+        .sltp-stepper-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #FFFFFF;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 0 14px;
+            text-align: left;
+            cursor: ns-resize; /* Show vertical resize cursor to indicate draggable */
+            user-select: none; /* Prevent text selection during drag */
+        }
+        .sltp-stepper-input:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .sltp-modal-metrics {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 12px;
+            font-family: 'Roboto Mono', monospace;
+            color: #848E9C;
+        }
+        .sltp-btn-save {
+            width: 100%;
+            height: 44px;
+            margin-top: 22px;
+            border-radius: 22px;
+            background: #00C076;
+            border: none;
+            color: #FFFFFF;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 192, 118, 0.4);
+            transition: all 0.15s ease;
+        }
+        .sltp-btn-save:hover {
+            background: #00D984;
+            box-shadow: 0 6px 18px rgba(0, 192, 118, 0.55);
+        }
+
+        .watchlist-items {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .watchlist-items::-webkit-scrollbar { width: 4px; }
+        .watchlist-items::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
+
+
+/* --- responsive.css --- */
+        /* Watchlist Column */
+        body.theme-light .watchlist-col {
+            background: var(--bg-dock);
+            border-right-color: var(--border-color);
+        }
+        body.theme-light .tradew-search-bar {
+            background: #FFFFFF;
+            border-bottom-color: var(--border-color);
+        }
+        body.theme-light .tradew-search-input-box {
+            background: var(--bg-card-alt);
+            border-color: var(--border-color);
+        }
+        body.theme-light .tradew-cat-carousel {
+            background: #FFFFFF;
+            border-bottom-color: var(--border-color);
+        }
+        body.theme-light .tradew-cat-pill {
+            color: var(--text-secondary);
+        }
+        body.theme-light .tradew-cat-pill:hover {
+            color: var(--text-primary);
+        }
+        body.theme-light .tradew-cat-pill.active {
+            color: var(--text-primary);
+            border-bottom: 2px solid #00C076;
+        }
+        body.theme-light .tradew-wl-header {
+            background: var(--bg-card-alt);
+            border-bottom-color: var(--border-subtle);
+            color: var(--text-secondary);
+        }
+        body.theme-light .tradew-wl-row {
+            border-bottom-color: var(--border-subtle);
+            background: transparent;
+        }
+        body.theme-light .tradew-wl-row:hover {
+            background: var(--hover-bg);
+        }
+        body.theme-light .tradew-wl-row.active {
+            background: rgba(0, 192, 118, 0.08);
+            border-left: 2px solid #00C076;
+        }
+        body.theme-light .tradew-wl-sym { color: var(--text-primary); }
+        body.theme-light .tradew-wl-price { color: var(--text-primary); }
+        body.theme-light .tradew-arrow-btn:hover { color: var(--text-primary); }
+
+        /* Stage Toolbar & Chart Stage */
+        body.theme-light .center-stage {
+            background: #FFFFFF;
+        }
+        body.theme-light .stage-toolbar {
+            background: #FFFFFF;
+            border-bottom-color: var(--border-color);
+        }
+        body.theme-light .stage-symbol-badge,
+        body.theme-light #chart-sym-title {
+            color: var(--text-primary);
+        }
+        body.theme-light .btn-nav {
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+        body.theme-light .btn-nav:hover {
+            background: var(--hover-bg);
+            color: var(--text-primary);
+        }
+        body.theme-light .nano-stream-badge {
+            background: rgba(0, 192, 118, 0.08);
+            border-color: rgba(0, 192, 118, 0.3);
+            color: #008A54;
+        }
+        body.theme-light .chart-stage-wrap {
+            background: #FFFFFF;
+        }
+        body.theme-light .chart-watermark {
+            opacity: 0.035;
+        }
+        body.theme-light .chart-watermark svg {
+            fill: #707A8A;
+        }
+        body.theme-light .chart-watermark span {
+            color: #707A8A;
+        }
+        body.theme-light .tradew-chart-brand-name {
+            color: #707A8A;
+        }
+
+        /* Right Sidebar Order Execution Ticket */
+        body.theme-light .sidebar-col {
+            background: #FFFFFF;
+            border-left-color: var(--border-color);
+        }
+        body.theme-light .tradew-panel-tabs {
+            border-bottom-color: var(--border-subtle);
+        }
+        body.theme-light .tradew-tab-item {
+            color: var(--text-secondary);
+        }
+        body.theme-light .tradew-tab-item.active {
+            color: var(--text-primary);
+        }
+        body.theme-light .tradew-tab-item.active::after {
+            background: #00C076;
+        }
+        body.theme-light .tradew-quote-box {
+            background: var(--bg-card-alt);
+            border-color: var(--border-color);
+        }
+        body.theme-light .quote-sell {
+            background: rgba(239, 83, 80, 0.06);
+            border: 1px solid rgba(239, 83, 80, 0.15);
+        }
+        body.theme-light .quote-sell.active {
+            background: #EF5350;
+            border: none;
+        }
+        body.theme-light .quote-buy {
+            background: rgba(0, 192, 118, 0.06);
+            border: 1px solid rgba(0, 192, 118, 0.15);
+        }
+        body.theme-light .quote-buy.active {
+            background: #00C076;
+            border: none;
+        }
+        body.theme-light .tradew-spread-pill {
+            background: #FFFFFF;
+            border-color: var(--border-color);
+            color: var(--text-primary);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+        body.theme-light .tradew-sentiment-container {
+            background: var(--bg-card-alt);
+            border-color: var(--border-color);
+        }
+        body.theme-light .tradew-stepper-box {
+            background: var(--bg-card-alt);
+            border-color: var(--border-color);
+        }
+        body.theme-light .stepper-main-val {
+            color: var(--text-primary);
+        }
+        body.theme-light .stepper-vert-actions {
+            border-left-color: var(--border-color);
+        }
+        body.theme-light .btn-stepper-vert {
+            color: var(--text-secondary);
+        }
+        body.theme-light .btn-stepper-vert:first-child {
+            border-bottom-color: var(--border-color);
+        }
+        body.theme-light .btn-stepper-vert:hover {
+            background: var(--hover-bg);
+            color: var(--text-primary);
+        }
+        body.theme-light .lot-preset-btn {
+            background: var(--bg-card-alt);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+        body.theme-light .lot-preset-btn:hover {
+            border-color: #00C076;
+            color: #00C076;
+        }
+        body.theme-light .lot-preset-btn.active {
+            background: rgba(0, 192, 118, 0.12);
+            border-color: #00C076;
+            color: #00C076;
+        }
+        body.theme-light .toggle-title {
+            color: var(--text-primary);
+        }
+        body.theme-light .summary-lbl {
+            color: var(--text-secondary);
+        }
+        body.theme-light .summary-val {
+            color: var(--text-primary);
+        }
+        body.theme-light .expand-divider-line {
+            background: var(--border-color);
+        }
+
+        /* Bottom Dock Section */
+        body.theme-light .tradew-dock {
+            background: var(--bg-dock);
+            border-top-color: var(--border-color);
+        }
+        body.theme-light .dock-tab-nav {
+            background: var(--bg-dock);
+            border-bottom-color: var(--border-color);
+        }
+        body.theme-light .dock-tab-btn {
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+        }
+        body.theme-light .dock-tab-btn:hover {
+            color: var(--text-primary);
+        }
+        body.theme-light .dock-tab-btn.active {
+            color: var(--text-primary);
+            border-bottom: 2px solid #00C076;
+            background: transparent;
+        }
+        body.theme-light .dock-layout-body,
+        body.theme-light .dock-view-body,
+        body.theme-light .dock-side-summary {
+            background: var(--bg-dock);
+            border-color: var(--border-color);
+        }
+        body.theme-light .dock-summary-lbl {
+            color: var(--text-secondary);
+        }
+        body.theme-light .dock-summary-val {
+            color: var(--text-primary);
+        }
+        body.theme-light .dock-table th {
+            background: var(--dock-header-bg);
+            border-bottom-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+        body.theme-light .dock-table td {
+            border-bottom-color: var(--border-subtle);
+        }
+        body.theme-light .dock-table tbody tr:hover {
+            background: var(--hover-bg);
+        }
+        body.theme-light .dock-table tbody tr.row-focus {
+            background: rgba(0, 192, 118, 0.08);
+        }
+        body.theme-light .btn-dock-close-circle {
+            background: var(--bg-card-alt);
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        /* Popups, Dropdowns & Modals in Light Mode */
+        body.theme-light #dock-custom-close-menu {
+            background: #FFFFFF;
+            border: 1px solid #E2E6ED;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        body.theme-light .tradew-select-acct-dropdown {
+            background: #FFFFFF;
+            border: 1px solid #E2E6ED;
+            box-shadow: 0 16px 44px rgba(0, 0, 0, 0.12);
+            color: var(--text-primary);
+        }
+        body.theme-light .tradew-modal-title-row {
+            color: var(--text-primary);
+        }
+        body.theme-light .tradew-acct-card {
+            background: #F4F6F9;
+            border: 1.5px solid #E2E6ED;
+        }
+        body.theme-light .tradew-acct-card.selected {
+            border-color: #00C076;
+            background: #FFFFFF;
+        }
+        body.theme-light .tradew-acct-type-name,
+        body.theme-light .tradew-acct-card-bal {
+            color: var(--text-primary);
+        }
+        body.theme-light .tradew-acct-id-tag {
+            border-color: #D0D5DD;
+            color: var(--text-secondary);
+        }
+        body.theme-light .tradew-acct-add-btn {
+            background: #F4F6F9;
+            border: 1px solid #E2E6ED;
+            color: var(--text-primary);
+        }
+        body.theme-light .tradew-acct-add-btn:hover {
+            background: #EAEFF5;
+        }
+
+        /* SLTP Floating Modal */
+        body.theme-light .sltp-modal-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E6ED;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+            color: var(--text-primary);
+        }
+        body.theme-light .sltp-modal-title {
+            color: var(--text-primary);
+        }
+        body.theme-light .sltp-modal-constraint {
+            color: var(--text-secondary);
+        }
+        body.theme-light .sltp-stepper-box {
+            background: #F4F6F9;
+            border: 1px solid #E2E6ED;
+        }
+        body.theme-light .sltp-stepper-input {
+            color: var(--text-primary);
+        }
+
+        /* Brain & Vault Mini Cards */
+        body.theme-light .brain-mini-card,
+        body.theme-light .vault-mini-card {
+            background: #FFFFFF;
+            border-color: var(--border-color);
+        }
+    
+        /* ── Right-side Entry Line TP/SL Buttons ───────────────────── */
+        #elb-bar {
+            position: fixed;
+            display: none;
+            flex-direction: row;
+            align-items: center;
+            gap: 4px;
+            transform: translateY(-50%);
+            pointer-events: auto;
+            user-select: none;
+            z-index: 10100;
+        }
+        .elb-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 20px;
+            padding: 0 7px;
+            border-radius: 3px;
+            border: 1px solid rgba(255,255,255,0.25);
+            background: #1E222D;
+            font-size: 11px;
+            font-weight: 800;
+            font-family: -apple-system, 'Segoe UI', sans-serif;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            transition: all 0.1s ease;
+        }
+        /* `display:flex` above would otherwise override the HTML hidden state. */
+        .elb-btn[hidden] { display: none !important; }
+        .elb-btn-tp { color: #00C076; border-color: rgba(0,192,118,0.6); }
+        .elb-btn-tp:hover { background: #00C076; color: #FFFFFF; }
+        .elb-btn-sl { color: #F6465D; border-color: rgba(246,70,93,0.6); }
+        .elb-btn-sl:hover { background: #F6465D; color: #FFFFFF; }
+        .elb-btn.is-dragging { opacity: 0.55; cursor: grabbing; }
+        #line-close-controls { position: fixed; z-index: 10001; pointer-events: none; }
+        .line-close-btn {
+            position: fixed;
+            display: none;
+            width: 18px;
+            height: 18px;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            /* Inline × only: no detached circle, shadow, or raised card. */
+            background: transparent;
+            color: #FFFFFF;
+            font: 400 15px/18px Arial, sans-serif;
+            cursor: grab;
+            touch-action: none;
+            pointer-events: auto;
+            box-shadow: none;
+            text-align: center;
+        }
+        .line-close-entry, .line-close-sl, .line-close-tp { color: #FFFFFF; }
+        .line-close-btn:hover { background: transparent; color: #FFFFFF; transform: scale(1.12); }
+        .line-close-btn:focus-visible { outline: 1px solid rgba(255,255,255,0.95); outline-offset: 1px; }
+        .line-close-btn.is-cancelling {
+            background: transparent;
+            color: #F0B90B;
+            transform: scale(1.16);
+            cursor: wait;
+        }
+        #tv-chart.sltp-line-dragging,
+        #tv-chart.sltp-line-dragging * { cursor: grabbing !important; }
