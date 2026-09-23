@@ -315,8 +315,51 @@ gateway_script = """
                 if (url.includes("/api/demo/state") || url.includes("/api/live/state")) {
                     const isLive = url.includes("/api/live/state");
                     const st = loadPortfolio(isLive);
-                    // Settle positions with any known live prices
-                    const active = st.active_positions || [];
+                    st.active_positions = st.active_positions || [];
+                    st.pending_orders = st.pending_orders || [];
+
+                    // Settle pending limit orders if market price reached limit price (Maker Fee: 0.02%)
+                    const pending = st.pending_orders;
+                    const remainingPending = [];
+                    for (const ord of pending) {
+                        const sym = ord.symbol;
+                        const t = liveTickerMap[sym];
+                        const currPrice = t ? parseFloat(t.lastPrice) : (FALLBACK_PRICES[sym] || ord.order_price);
+                        const isBuy = String(ord.type || ord.side || "BUY").toUpperCase().includes("BUY");
+                        const isFilled = isBuy ? (currPrice <= ord.order_price) : (currPrice >= ord.order_price);
+                        if (isFilled && ord.order_price > 0) {
+                            const cSize = getContractSize(sym);
+                            const notional = ord.order_price * ord.volume_lots * cSize;
+                            const makerFee = Math.round(notional * 0.0002 * 1000) / 1000; // Binance Maker Fee: 0.02%
+                            const newPos = {
+                                pos_id: (isLive ? "REAL-" : "POS-") + Math.floor(100000 + Math.random() * 900000),
+                                order_no: ord.order_no,
+                                symbol: sym,
+                                side: isBuy ? "BUY" : "SELL",
+                                order_type: "LIMIT",
+                                volume_lots: ord.volume_lots,
+                                entry_price: ord.order_price,
+                                current_price: currPrice,
+                                sl_price: ord.sl_price,
+                                tp_price: ord.tp_price,
+                                fee: makerFee,
+                                fee_rate: 0.0002,
+                                entry_time: new Date().toLocaleTimeString(),
+                                is_risk_free: false,
+                                is_real: isLive,
+                                tranches: { queen: { tp_price: ord.tp_price } }
+                            };
+                            st.wallet_balance = Math.round((st.wallet_balance - makerFee) * 100) / 100;
+                            st.total_equity = Math.round((st.wallet_balance + (st.safe_vault || 0)) * 100) / 100;
+                            st.active_positions.unshift(newPos);
+                        } else {
+                            remainingPending.push(ord);
+                        }
+                    }
+                    st.pending_orders = remainingPending;
+
+                    // Settle active positions with live prices
+                    const active = st.active_positions;
                     const remaining = [];
                     for (const pos of active) {
                         const sym = pos.symbol;
@@ -339,7 +382,9 @@ gateway_script = """
                             const closeP = hitTp ? tp : sl;
                             const exitDiff = isBuy ? (closeP - pos.entry_price) : (pos.entry_price - closeP);
                             const exitNotional = closeP * pos.volume_lots * cSize;
-                            const closeFee = Math.round(exitNotional * 0.0005 * 1000) / 1000;
+                            // Take Profit = Maker Limit Order (0.02%), Stop Loss = Market Taker Order (0.05%)
+                            const closeFeeRate = hitTp ? 0.0002 : 0.0005;
+                            const closeFee = Math.round(exitNotional * closeFeeRate * 1000) / 1000;
                             const grossPnl = Math.round((exitDiff * pos.volume_lots * cSize) * 100) / 100;
                             const totalFee = Math.round(((pos.fee || 0) + closeFee) * 1000) / 1000;
                             const finalPnl = Math.round((grossPnl - totalFee) * 100) / 100;
@@ -375,7 +420,7 @@ gateway_script = """
                                 total_fee: totalFee,
                                 swap: 0.0,
                                 final_net_pnl: finalPnl,
-                                exit_reason: hitTp ? "Take Profit Hit" : "Stop Loss Hit"
+                                exit_reason: hitTp ? "Take Profit Hit (Maker 0.02%)" : "Stop Loss Hit (Taker 0.05%)"
                             });
                         } else {
                             remaining.push(pos);
@@ -404,7 +449,9 @@ gateway_script = """
                     const cSize = isRealPos ? 1.0 : getContractSize(sym);
                     const notional = entryP * vol * cSize;
                     const margin = notional / 50.0;
-                    const fee = Math.round(notional * 0.0005 * 1000) / 1000;
+                    // Binance Futures Fees: Maker = 0.02% (Limit), Taker = 0.05% (Market)
+                    const feeRate = isLimit ? 0.0002 : 0.0005;
+                    const fee = Math.round(notional * feeRate * 1000) / 1000;
 
                     if (isLimit) {
                         const orderNo = String(Math.floor(100000 + Math.random() * 900000));
@@ -412,10 +459,14 @@ gateway_script = """
                             order_no: orderNo,
                             symbol: sym,
                             type: `${side} LIMIT`,
+                            side: side,
+                            order_type: "LIMIT",
                             place_time: new Date().toLocaleTimeString(),
                             volume_lots: vol,
                             order_price: entryP,
                             current_price: liveTickerMap[sym]?.lastPrice || entryP,
+                            fee: fee,
+                            fee_rate: 0.0002,
                             sl_price: body.sl_price ? parseFloat(body.sl_price) : null,
                             tp_price: body.tp_price ? parseFloat(body.tp_price) : null,
                             status: "PENDING"
@@ -423,7 +474,7 @@ gateway_script = """
                         st.pending_orders = st.pending_orders || [];
                         st.pending_orders.unshift(pendingOrd);
                         savePortfolio(st, isLive);
-                        return new Response(JSON.stringify({ status: "SUCCESS", order_no: orderNo, message: `Limit order #${orderNo} placed` }), {
+                        return new Response(JSON.stringify({ status: "SUCCESS", order_no: orderNo, fee: fee, fee_rate: 0.0002, message: `Limit order #${orderNo} placed (Maker fee: 0.02%)` }), {
                             status: 200,
                             headers: { "Content-Type": "application/json" }
                         });
@@ -431,6 +482,7 @@ gateway_script = """
 
                     const newPos = {
                         pos_id: (isLive ? "REAL-" : "POS-") + Math.floor(100000 + Math.random() * 900000),
+                        order_no: String(Math.floor(100000 + Math.random() * 900000)),
                         symbol: sym,
                         side: side,
                         order_type: "MARKET",
@@ -441,6 +493,7 @@ gateway_script = """
                         tp_price: body.tp_price ? parseFloat(body.tp_price) : null,
                         margin_locked: Math.round(margin * 100) / 100,
                         fee: fee,
+                        fee_rate: 0.0005,
                         unrealized_pnl: 0.0,
                         entry_time: new Date().toLocaleTimeString(),
                         is_risk_free: false,
@@ -454,7 +507,7 @@ gateway_script = """
                     st.total_equity = Math.round((st.wallet_balance + (st.safe_vault || 0)) * 100) / 100;
                     st.active_positions.push(newPos);
                     savePortfolio(st, isLive);
-                    return new Response(JSON.stringify({ status: "SUCCESS", pos_id: newPos.pos_id, message: "Order executed at $" + entryP }), {
+                    return new Response(JSON.stringify({ status: "SUCCESS", pos_id: newPos.pos_id, fee: fee, fee_rate: 0.0005, message: "Market order executed at $" + entryP + " (Taker fee: 0.05%)" }), {
                         status: 200,
                         headers: { "Content-Type": "application/json" }
                     });
@@ -485,8 +538,9 @@ gateway_script = """
                             const exitDiff = isBuy ? (closeP - closedPos.entry_price) : (closedPos.entry_price - closeP);
                             const isRealPos = Boolean(closedPos.is_real || isLive || (closedPos.pos_id && String(closedPos.pos_id).startsWith("REAL-")));
                             const cSize = isRealPos ? 1.0 : getContractSize(sym);
-                            const exitNotional = closeP * closedPos.volume_lots * cSize;
-                            const closeFee = Math.round(exitNotional * 0.0005 * 1000) / 1000;
+                            const isLimitClose = (body.reason === "TP_HIT" || body.is_limit);
+                            const closeFeeRate = isLimitClose ? 0.0002 : 0.0005;
+                            const closeFee = Math.round(exitNotional * closeFeeRate * 1000) / 1000;
                             const grossPnl = Math.round((exitDiff * closedPos.volume_lots * cSize) * 100) / 100;
                             const totalFee = Math.round(((closedPos.fee || 0) + closeFee) * 1000) / 1000;
                             const finalPnl = Math.round((grossPnl - totalFee) * 100) / 100;

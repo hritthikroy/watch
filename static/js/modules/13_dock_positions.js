@@ -366,11 +366,20 @@ function getSymbolTickSpec(sym) {
                 const fltCls = totalUnrealized >= 0 ? "val-green" : "val-red";
                 _setFloatingPnlDisplay(totalUnrealized);
 
-                // Update Dock Right Account Summary (Image 2 style)
+                // Update Dock Right Account Summary with dynamic margin calculation (0 hardcoded values)
+                let computedMargin = 0;
+                for (const p of positions) {
+                    const lev = Number(p.leverage) || 20;
+                    const isRealPos = Boolean(p.is_real || (p.pos_id && String(p.pos_id).startsWith("REAL-")));
+                    const cSize = isRealPos ? 1.0 : (Number(p.contract_size) || getLotContractSize(p.symbol));
+                    const entryP = Number(p.entry_price) || 0;
+                    const vol = Number(p.volume_lots ?? p.lot ?? 0.01);
+                    computedMargin += (entryP * vol * cSize) / lev;
+                }
                 const sideTot = document.getElementById("dock-side-total");
                 const sideMrg = document.getElementById("dock-side-margin");
                 if (sideTot) sideTot.innerText = "$" + (d.wallet_balance !== undefined ? d.wallet_balance.toFixed(2) : "0.00");
-                if (sideMrg) sideMrg.innerText = "$" + (d.used_margin !== undefined ? d.used_margin.toFixed(2) : (isLive ? "0.00" : "0.30"));
+                if (sideMrg) sideMrg.innerText = "$" + (d.used_margin !== undefined ? d.used_margin.toFixed(2) : computedMargin.toFixed(2));
 
                 // Update TradeW Right Sidebar Top Account Strip (media_1789950712703.png style)
                 const acctBal = document.getElementById("disp-tradew-bal");
@@ -437,13 +446,34 @@ function getSymbolTickSpec(sym) {
                                 const sideText = isBuy ? `<span style="color: #00C076; font-weight: 700;">Buy</span>` : `<span style="color: #EF5350; font-weight: 700;">Sell</span>`;
                                 const pnlVal = calculatePositionPnl(pos, Number(pos.current_price) || Number(pos.entry_price));
                                 const pnlCls = pnlVal >= 0 ? "val-green" : "val-red";
-                                const pnlSign = pnlVal >= 0 ? "+" : "";
+                                const pnlSign = pnlVal >= 0 ? "+" : "-";
+
+                                const lev = Number(pos.leverage) || 20;
+                                const isRealPos = Boolean(pos.is_real || (pos.pos_id && String(pos.pos_id).startsWith("REAL-")));
+                                const contractSize = isRealPos ? 1.0 : (Number(pos.contract_size) || getLotContractSize(pos.symbol));
+                                const entry = Number(pos.entry_price) || 1;
+                                const lotNum = Number(pos.volume_lots ?? pos.lot ?? 0.01);
+                                const initialMargin = (entry * lotNum * contractSize) / lev;
+                                const roe = initialMargin > 0 ? (pnlVal / initialMargin) * 100 : 0;
+                                const roeSign = roe >= 0 ? "+" : "-";
+
                                 const rawFee = Number(pos.fee);
-                                const fee = Number.isFinite(rawFee)
-                                    ? (Math.abs(rawFee) < 0.0000001 ? "0.00" : `-${Math.abs(rawFee).toFixed(2)}`)
+                                const feeRate = Number(pos.fee_rate) || (pos.order_type === 'LIMIT' ? 0.0002 : 0.0005);
+                                const feeType = feeRate <= 0.00025 ? "Maker" : "Taker";
+                                const feeRatePct = (feeRate * 100).toFixed(2) + "%";
+                                const feeDisp = Number.isFinite(rawFee)
+                                    ? (Math.abs(rawFee) < 0.0000001 ? `$0.00 <span style="font-size:9px;color:#848E9C;">${feeType}</span>` : `-$${Math.abs(rawFee).toFixed(2)} <span style="font-size:9px;color:#848E9C;">${feeType} (${feeRatePct})</span>`)
                                     : "--";
+
+                                const openFee = Math.abs(rawFee || 0);
+                                const currPrice = Number(pos.current_price) || Number(pos.entry_price);
+                                const notional = currPrice * lotNum * contractSize;
+                                const estExitFee = notional * 0.0005; // Standard Taker 0.05% on market exit
+                                const netPnl = pnlVal - openFee - estExitFee;
+                                const netSign = netPnl >= 0 ? "+" : "-";
+
                                 const swap = Number.isFinite(Number(pos.swap)) ? Number(pos.swap).toFixed(2) : "--";
-                                const lot = (pos.volume_lots || 0.01).toFixed(2);
+                                const lot = lotNum.toFixed(2);
                                 const orderNo = pos.order_no || pos.pos_id || "--";
                                 const rawSl = (pos.sl_price !== null && pos.sl_price !== undefined) ? pos.sl_price : (pos.side === 'BUY' ? pos.entry_price * 0.9965 : pos.entry_price * 1.0035);
                                 const hasSl = pos.sl_price !== null && pos.sl_price !== undefined && Number(pos.sl_price) > 0 && isValidSLTP(pos.sl_price, pos.entry_price, pos.symbol);
@@ -475,10 +505,13 @@ function getSymbolTickSpec(sym) {
                                     <td id="position-current-${pos.pos_id}" style="font-family: 'Roboto Mono', monospace; font-weight: 700; color: var(--text-primary);">${(pos.current_price || pos.entry_price || 0).toFixed(prec)}</td>
                                     <td id="position-sl-${pos.pos_id}" style="font-family: 'Roboto Mono', monospace; color: var(--binance-red);">${slDisp}</td>
                                     <td id="position-tp-${pos.pos_id}" style="font-family: 'Roboto Mono', monospace; color: var(--binance-green);">${tpDisp}</td>
-                                    <td style="color: var(--text-secondary); font-size: 11px;">${fee}</td>
+                                    <td id="position-fee-${pos.pos_id}" style="color: var(--text-secondary); font-size: 11px; white-space: nowrap;">${feeDisp}</td>
                                     <td style="color: var(--text-secondary); font-size: 11px;">${swap}</td>
                                     <td style="color: var(--text-secondary); font-size: 11px; font-family: 'Roboto Mono', monospace;">${orderNo}</td>
-                                    <td id="position-pnl-${pos.pos_id}" class="${pnlCls}" style="font-family: 'Roboto Mono', monospace; font-weight: 700;">${pnlSign}${pnlVal.toFixed(2)}</td>
+                                    <td id="position-pnl-${pos.pos_id}" class="${pnlCls}" style="font-family: 'Roboto Mono', monospace; font-weight: 700; white-space: nowrap;">
+                                        <div>${pnlSign}$${Math.abs(pnlVal).toFixed(2)} <span style="font-size:10px;">(${roeSign}${Math.abs(roe).toFixed(2)}%)</span></div>
+                                        <div style="font-size:10px; font-weight:400; color: #848E9C;">Net: ${netSign}$${Math.abs(netPnl).toFixed(2)}</div>
+                                    </td>
                                     <td style="text-align: right;" onclick="event.stopPropagation();">
                                         ${!pos.is_risk_free ? `<button class="btn-dock-sm btn-dock-be" onclick="lockBreakeven('${pos.pos_id}')" title="Lock Breakeven (+0.15R)">&#128274; BE</button>` : ''}
                                         <button class="btn-dock-close-circle" onclick="closePosition('${pos.pos_id}')" title="Close Position">&#10005;</button>
@@ -550,7 +583,7 @@ function getSymbolTickSpec(sym) {
                                 <td style="font-family: 'Roboto Mono', monospace;">${ord.current_price ? ord.current_price.toFixed(prec) : '--'}</td>
                                 <td style="font-family: 'Roboto Mono', monospace; color: var(--binance-red);">${ord.sl_price ? ord.sl_price.toFixed(prec) : '--'}</td>
                                 <td style="font-family: 'Roboto Mono', monospace; color: var(--binance-green);">${ord.tp_price ? ord.tp_price.toFixed(prec) : '--'}</td>
-                                <td style="color: var(--text-secondary); font-size: 11px;">$0.00</td>
+                                <td style="color: var(--text-secondary); font-size: 11px; white-space: nowrap;">$0.00 <span style="font-size:9px;color:#848E9C;">Maker (${((Number(ord.fee_rate) || 0.0002) * 100).toFixed(2)}%)</span></td>
                                 <td style="color: var(--text-secondary); font-size: 11px; font-family: 'Roboto Mono', monospace;">#${ord.order_no || '--'}</td>
                                 <td><span style="color: var(--binance-gold); font-size: 11px; font-weight: 700;">PENDING</span></td>
                                 <td style="text-align: right;"><button class="btn-dock-sm btn-dock-close" onclick="cancelPendingOrder('${ord.order_no}')">Cancel</button></td>

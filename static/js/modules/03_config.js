@@ -220,9 +220,32 @@ function _showReconnectBanner(show) {
                 const currentCell = document.getElementById(`position-current-${position.pos_id}`);
                 const pnlCell = document.getElementById(`position-pnl-${position.pos_id}`);
                 if (currentCell) currentCell.textContent = current.toFixed(spec.prec);
+
+                // Real PnL with ROE % and Net PnL calculation
+                const pnlVal = position.unrealized_pnl;
+                const pnlSign = pnlVal >= 0 ? '+' : '-';
+                const pnlCls = pnlVal >= 0 ? 'val-green' : 'val-red';
+
+                const lev = Number(position.leverage) || 20;
+                const isReal = Boolean(position.is_real || (position.pos_id && String(position.pos_id).startsWith("REAL-")));
+                const contractSize = isReal ? 1.0 : (Number(position.contract_size) || getLotContractSize(position.symbol));
+                const entry = Number(position.entry_price) || 1;
+                const lot = Number(position.volume_lots ?? position.lot ?? 0.01);
+                const initialMargin = (entry * lot * contractSize) / lev;
+                const roe = initialMargin > 0 ? (pnlVal / initialMargin) * 100 : 0;
+                const roeSign = roe >= 0 ? '+' : '-';
+
+                const openFee = Math.abs(Number(position.fee) || 0);
+                const notional = current * lot * contractSize;
+                const estExitFee = notional * 0.0005; // Standard Taker 0.05% on market exit
+                const netPnl = pnlVal - openFee - estExitFee;
+                const netSign = netPnl >= 0 ? '+' : '-';
+
+                const pnlHtml = `<div>${pnlSign}$${Math.abs(pnlVal).toFixed(2)} <span style="font-size:10px;">(${roeSign}${Math.abs(roe).toFixed(2)}%)</span></div><div style="font-size:10px; font-weight:400; color: #848E9C;">Net: ${netSign}$${Math.abs(netPnl).toFixed(2)}</div>`;
+
                 if (pnlCell) {
-                    pnlCell.textContent = `${position.unrealized_pnl >= 0 ? '+' : ''}${position.unrealized_pnl.toFixed(2)}`;
-                    pnlCell.className = position.unrealized_pnl >= 0 ? 'val-green' : 'val-red';
+                    pnlCell.innerHTML = pnlHtml;
+                    pnlCell.className = pnlCls;
                 }
 
                 // Fallback: also update by tr[data-pos-id] query selector
@@ -233,8 +256,8 @@ function _showReconnectBanner(show) {
                         if (cells.length >= 12) {
                             if (!currentCell) cells[5].textContent = current.toFixed(spec.prec);
                             if (!pnlCell) {
-                                cells[11].textContent = `${position.unrealized_pnl >= 0 ? '+' : ''}${position.unrealized_pnl.toFixed(2)}`;
-                                cells[11].className = position.unrealized_pnl >= 0 ? 'val-green' : 'val-red';
+                                cells[11].innerHTML = pnlHtml;
+                                cells[11].className = pnlCls;
                             }
                         }
                     }

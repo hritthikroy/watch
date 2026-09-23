@@ -427,9 +427,18 @@
                     ? Number(lastKnownPrice)
                     : (Number(position?.current_price) || Number(lastKnownPrice) || meta.entryPrice);
                 const pnl = position ? calculatePositionPnl(position, mark) : 0;
-                const pnlSign = pnl >= 0 ? '+' : '';
+                const pnlSign = pnl >= 0 ? '+' : '-';
                 const sideStr = isSell ? 'SELL' : 'BUY';
-                const nextText = `${sideStr} ${meta.lot}  ${pnlSign}${pnl.toFixed(2)}`;
+
+                const lev = Number(position?.leverage) || 20;
+                const isReal = Boolean(position?.is_real || (position?.pos_id && String(position.pos_id).startsWith("REAL-")));
+                const contractSize = isReal ? 1.0 : (Number(position?.contract_size) || getLotContractSize(meta.symbol));
+                const entryVal = (Number(meta.entryPrice) || 1) * (Number(meta.lot) || 0.01) * contractSize;
+                const initMargin = entryVal / lev;
+                const roe = initMargin > 0 ? (pnl / initMargin) * 100 : 0;
+                const roeSign = roe >= 0 ? '+' : '-';
+
+                const nextText = `${sideStr} ${meta.lot}  ${pnlSign}$${Math.abs(pnl).toFixed(2)} (${roeSign}${Math.abs(roe).toFixed(1)}%)`;
                 if (label.textContent !== nextText) label.textContent = nextText;
             } else {
                 const isLong = (String(meta.side).toUpperCase() === 'BUY' || String(meta.side).toUpperCase() === 'LONG');
@@ -438,8 +447,15 @@
                 const isReal = Boolean(meta.is_real || (meta.posId && String(meta.posId).startsWith("REAL-")));
                 const contractSize = isReal ? 1.0 : getLotContractSize(meta.symbol);
                 const pnl = difference * lot * contractSize;
-                const sign = pnl >= 0 ? '+' : '';
-                const nextHtml = `${type} ${lot}&nbsp;&nbsp;Est: ${sign}${pnl.toFixed(2)}`;
+                const sign = pnl >= 0 ? '+' : '-';
+
+                const lev = Number(meta.leverage) || 20;
+                const entryVal = (Number(meta.entryPrice) || 1) * lot * contractSize;
+                const initMargin = entryVal / lev;
+                const roe = initMargin > 0 ? (pnl / initMargin) * 100 : 0;
+                const roeSign = roe >= 0 ? '+' : '-';
+
+                const nextHtml = `${type} ${lot}&nbsp;&nbsp;Est: ${sign}$${Math.abs(pnl).toFixed(2)} (${roeSign}${Math.abs(roe).toFixed(1)}%)`;
                 if (label.innerHTML !== nextHtml) label.innerHTML = nextHtml;
             }
 
@@ -818,7 +834,7 @@
 
         // ── Drag Engine ──────────────────────────────────────────────────────
         function _getPricePrec(sym) {
-            return {BTCUSDT:2,ETHUSDT:2,SOLUSDT:3,BNBUSDT:2,XRPUSDT:4,AVAXUSDT:3,LINKUSDT:3,NEARUSDT:4,ADAUSDT:5,SUIUSDT:4,DOGEUSDT:5,DOTUSDT:3,LTCUSDT:2,ARBUSDT:4,OPUSDT:4,SEIUSDT:4,INJUSDT:3,WIFUSDT:4,PENDLEUSDT:4,JUPUSDT:4,RENDERUSDT:3,AAVEUSDT:2,UNIUSDT:3,CRVUSDT:4,DYDXUSDT:4,ENAUSDT:4,WLDUSDT:4,PYTHUSDT:5,GMXUSDT:2,TIAUSDT:4,ZROUSDT:4,APEUSDT:4,GALAUSDT:5,SANDUSDT:4,MANAUSDT:4,LRCUSDT:5,STXUSDT:4}[sym] || 4;
+            return getSymbolSpec(sym)?.prec ?? 4;
         }
 
         function _dragToast(msg, color) {
