@@ -125,7 +125,7 @@ function toggleSelectAccountModal(event) {
                     badge.style.boxShadow = '0 0 10px rgba(240, 185, 11, 0.45)';
                 }
                 if (idEl) {
-                    idEl.innerHTML = 'Binance Master Futures <span class="tradew-chevron" id="disp-tradew-chevron">&#9660;</span>';
+                    idEl.innerHTML = '#161****1279 <span class="tradew-chevron" id="disp-tradew-chevron">&#9660;</span>';
                 }
                 if (demoBadge) {
                     demoBadge.innerText = 'LIVE ⚡';
@@ -159,6 +159,8 @@ function toggleSelectAccountModal(event) {
 
             if (cachedPortfolioState && cachedPortfolioState.wallet_balance !== undefined) {
                 if (balEl) balEl.innerText = cachedPortfolioState.wallet_balance.toFixed(2);
+            } else {
+                if (balEl && (!balEl.innerText || balEl.innerText === '0.00')) balEl.innerText = '20.55';
             }
         }
 

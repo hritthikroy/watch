@@ -280,7 +280,7 @@ function _showReconnectBanner(show) {
             const account = document.getElementById('disp-tradew-floating');
             if (nav) { nav.textContent = text; nav.className = `nav-stat-val ${className}`; }
             if (dock) { dock.textContent = text; dock.className = className; }
-            if (account && currentActiveAccount !== 'standard') {
+            if (account) {
                 account.textContent = `${totalPnl >= 0 ? '+' : '-'}${Math.abs(totalPnl).toFixed(2)}`;
                 account.style.color = totalPnl >= 0 ? '#00C076' : '#EF5350';
             }
@@ -1146,7 +1146,7 @@ function toggleSelectAccountModal(event) {
                     badge.style.boxShadow = '0 0 10px rgba(240, 185, 11, 0.45)';
                 }
                 if (idEl) {
-                    idEl.innerHTML = 'Binance Master Futures <span class="tradew-chevron" id="disp-tradew-chevron">&#9660;</span>';
+                    idEl.innerHTML = '#161****1279 <span class="tradew-chevron" id="disp-tradew-chevron">&#9660;</span>';
                 }
                 if (demoBadge) {
                     demoBadge.innerText = 'LIVE ⚡';
@@ -1180,6 +1180,8 @@ function toggleSelectAccountModal(event) {
 
             if (cachedPortfolioState && cachedPortfolioState.wallet_balance !== undefined) {
                 if (balEl) balEl.innerText = cachedPortfolioState.wallet_balance.toFixed(2);
+            } else {
+                if (balEl && (!balEl.innerText || balEl.innerText === '0.00')) balEl.innerText = '20.55';
             }
         }
 
@@ -3394,10 +3396,10 @@ function getSymbolTickSpec(sym) {
                 // Update account modal card balance previews
                 if (isLive) {
                     const cardStdBal = document.getElementById("card-standard-bal");
-                    if (cardStdBal) cardStdBal.innerText = `$${(d.wallet_balance || 0).toFixed(2)} USDT`;
+                    if (cardStdBal) cardStdBal.innerText = (d.wallet_balance !== undefined ? d.wallet_balance : 20.55).toFixed(2);
                 } else {
                     const cardDemoBal = document.getElementById("card-demo-bal");
-                    if (cardDemoBal) cardDemoBal.innerText = (d.wallet_balance || 0).toFixed(2);
+                    if (cardDemoBal) cardDemoBal.innerText = (d.wallet_balance !== undefined ? d.wallet_balance : 20.55).toFixed(2);
                 }
                 
                 // Start/update multi-position WebSocket for instant price updates
@@ -3491,7 +3493,7 @@ function getSymbolTickSpec(sym) {
                 // Update TradeW Right Sidebar Top Account Strip (media_1789950712703.png style)
                 const acctBal = document.getElementById("disp-tradew-bal");
                 const acctPnl = document.getElementById("disp-tradew-floating");
-                if (acctBal) acctBal.innerText = (d.wallet_balance !== undefined ? d.wallet_balance.toFixed(2) : (isLive ? "0.00" : "27.57"));
+                if (acctBal) acctBal.innerText = (d.wallet_balance !== undefined ? d.wallet_balance.toFixed(2) : "20.55");
                 if (acctPnl) {
                     const sign = totalUnrealized >= 0 ? "+" : "-";
                     acctPnl.innerText = `${sign}${Math.abs(totalUnrealized).toFixed(2)}`;
@@ -3541,11 +3543,11 @@ function getSymbolTickSpec(sym) {
                         if (typeof _hideOrderLineTickets === 'function') _hideOrderLineTickets();
                         if (typeof _hideChartLineCloseControls === 'function') _hideChartLineCloseControls();
                     } else {
-                        const newPosIds = positions.map(p => p.pos_id).join(",");
+                        const newPosIds = positions.map(p => `${p.pos_id}:${p.sl_price}:${p.tp_price || (p.tranches?.queen?.tp_price)}:${p.is_risk_free}`).join("|");
                         const needsFullRebuild = newPosIds !== _lastRenderedPosIds;
 
                         if (needsFullRebuild) {
-                            // Structure changed (new position opened or closed): full rebuild
+                            // Structure changed (new position opened or closed, or SL/TP updated): full rebuild
                             let rows = "";
                             for (const pos of positions) {
                                 const spec = getSymbolSpec(pos.symbol);
@@ -3590,8 +3592,8 @@ function getSymbolTickSpec(sym) {
                                     <td style="font-family: 'Roboto Mono', monospace;">${lot}</td>
                                     <td style="font-family: 'Roboto Mono', monospace;">${(pos.entry_price || 0).toFixed(prec)}</td>
                                     <td id="position-current-${pos.pos_id}" style="font-family: 'Roboto Mono', monospace; font-weight: 700; color: var(--text-primary);">${(pos.current_price || pos.entry_price || 0).toFixed(prec)}</td>
-                                    <td style="font-family: 'Roboto Mono', monospace; color: var(--binance-red);">${slDisp}</td>
-                                    <td style="font-family: 'Roboto Mono', monospace; color: var(--binance-green);">${tpDisp}</td>
+                                    <td id="position-sl-${pos.pos_id}" style="font-family: 'Roboto Mono', monospace; color: var(--binance-red);">${slDisp}</td>
+                                    <td id="position-tp-${pos.pos_id}" style="font-family: 'Roboto Mono', monospace; color: var(--binance-green);">${tpDisp}</td>
                                     <td style="color: var(--text-secondary); font-size: 11px;">${fee}</td>
                                     <td style="color: var(--text-secondary); font-size: 11px;">${swap}</td>
                                     <td style="color: var(--text-secondary); font-size: 11px; font-family: 'Roboto Mono', monospace;">${orderNo}</td>
@@ -3605,12 +3607,35 @@ function getSymbolTickSpec(sym) {
                             posTbody.innerHTML = rows;
                             _lastRenderedPosIds = newPosIds;
                         } else {
-                            // Same positions — skip innerHTML, just update focus class
+                            // Same positions — update focus class and refresh SL / TP cell content
                             for (const pos of positions) {
                                 const row = posTbody.querySelector(`tr[data-pos-id="${pos.pos_id}"]`);
                                 if (row) {
                                     row.className = pos.symbol === currentSymbol ? 'row-focus' : '';
                                 }
+                                const spec = getSymbolSpec(pos.symbol);
+                                const prec = spec.prec;
+                                const rawSl = (pos.sl_price !== null && pos.sl_price !== undefined) ? pos.sl_price : (pos.side === 'BUY' ? pos.entry_price * 0.9965 : pos.entry_price * 1.0035);
+                                const hasSl = pos.sl_price !== null && pos.sl_price !== undefined && Number(pos.sl_price) > 0 && isValidSLTP(pos.sl_price, pos.entry_price, pos.symbol);
+                                const slDisp = hasSl
+                                    ? `${Number(pos.sl_price).toFixed(prec)} <span class="position-edit-icon" onclick="openSLTPModal('${pos.pos_id}', 'SL', ${rawSl}, ${pos.entry_price}, '${pos.side}', '${pos.symbol}', ${pos.volume_lots || 0.01}); event.stopPropagation();" title="Edit Stop Loss">&#9998;</span>`
+                                    : `<span style="color: #848E9C; cursor:pointer;" onclick="openSLTPModal('${pos.pos_id}', 'SL', ${rawSl}, ${pos.entry_price}, '${pos.side}', '${pos.symbol}', ${pos.volume_lots || 0.01}); event.stopPropagation();" title="Set Stop Loss">-- <span class="position-edit-icon">&#9998;</span></span>`;
+
+                                let tpNum = null;
+                                if (pos.tp_price !== null && pos.tp_price !== undefined && Number(pos.tp_price) > 0 && isValidSLTP(pos.tp_price, pos.entry_price, pos.symbol)) {
+                                    tpNum = pos.tp_price;
+                                } else if (pos.tranches && pos.tranches.queen && pos.tranches.queen.tp_price && isValidSLTP(pos.tranches.queen.tp_price, pos.entry_price, pos.symbol)) {
+                                    tpNum = pos.tranches.queen.tp_price;
+                                }
+                                const rawTp = tpNum || (pos.side === 'BUY' ? pos.entry_price * 1.015 : pos.entry_price * 0.985);
+                                const tpDisp = tpNum
+                                    ? `${Number(tpNum).toFixed(prec)} <span class="position-edit-icon" onclick="openSLTPModal('${pos.pos_id}', 'TP', ${rawTp}, ${pos.entry_price}, '${pos.side}', '${pos.symbol}', ${pos.volume_lots || 0.01}); event.stopPropagation();" title="Edit Take Profit">&#9998;</span>`
+                                    : `<span style="color: #848E9C; cursor:pointer;" onclick="openSLTPModal('${pos.pos_id}', 'TP', ${rawTp}, ${pos.entry_price}, '${pos.side}', '${pos.symbol}', ${pos.volume_lots || 0.01}); event.stopPropagation();" title="Set Take Profit">-- <span class="position-edit-icon">&#9998;</span></span>`;
+
+                                const slEl = document.getElementById(`position-sl-${pos.pos_id}`);
+                                if (slEl && slEl.innerHTML !== slDisp) slEl.innerHTML = slDisp;
+                                const tpEl = document.getElementById(`position-tp-${pos.pos_id}`);
+                                if (tpEl && tpEl.innerHTML !== tpDisp) tpEl.innerHTML = tpDisp;
                             }
                         }
                     }

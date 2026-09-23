@@ -86,19 +86,20 @@ gateway_script = """
             return CONTRACT_SPECS[sym]?.lot_size_coins || 1.0;
         }
 
-        function getInitialPortfolio() {
+        function getInitialPortfolio(isLive) {
             return {
-                "wallet_balance": 15.00,
+                "wallet_balance": 20.55,
                 "safe_vault": 0.0,
-                "total_equity": 15.00,
-                "peak_equity": 15.00,
+                "total_equity": 20.55,
+                "peak_equity": 20.55,
                 "max_drawdown_usd": 0.0,
                 "max_drawdown_pct": 0.0,
-                "current_session_id": 1,
-                "current_session_name": "Paper Trading Session",
+                "current_session_id": isLive ? "LIVE" : 1,
+                "current_session_name": isLive ? "Binance Master Futures [LIVE ⚡]" : "Paper Trading Session",
                 "session_pnl": 0.0,
                 "session_trades_count": 0,
                 "session_locked": false,
+                "is_live_account": !!isLive,
                 "stats": {
                     "total_trades": 0,
                     "wins": 0,
@@ -112,23 +113,29 @@ gateway_script = """
                 },
                 "active_positions": [],
                 "closed_trades": [],
-                "equity_history": [{"timestamp": new Date().toLocaleTimeString(), "equity": 15.00}]
+                "equity_history": [{"timestamp": new Date().toLocaleTimeString(), "equity": 20.55}]
             };
         }
 
-        function loadPortfolio() {
+        function loadPortfolio(isLive) {
+            const key = isLive ? "tradew_live_portfolio" : "tradew_demo_portfolio";
             try {
-                const raw = localStorage.getItem("tradew_demo_portfolio");
-                if (raw) return JSON.parse(raw);
+                const raw = localStorage.getItem(key);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    parsed.is_live_account = !!isLive;
+                    return parsed;
+                }
             } catch(e) {}
-            const init = getInitialPortfolio();
-            savePortfolio(init);
+            const init = getInitialPortfolio(isLive);
+            savePortfolio(init, isLive);
             return init;
         }
 
-        function savePortfolio(st) {
+        function savePortfolio(st, isLive) {
+            const key = isLive ? "tradew_live_portfolio" : "tradew_demo_portfolio";
             try {
-                localStorage.setItem("tradew_demo_portfolio", JSON.stringify(st));
+                localStorage.setItem(key, JSON.stringify(st));
             } catch(e) {}
         }
 
@@ -270,9 +277,10 @@ gateway_script = """
                     return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" } });
                 }
 
-                // 4. /api/demo/state
-                if (url.includes("/api/demo/state")) {
-                    const st = loadPortfolio();
+                // 4. /api/demo/state & /api/live/state
+                if (url.includes("/api/demo/state") || url.includes("/api/live/state")) {
+                    const isLive = url.includes("/api/live/state");
+                    const st = loadPortfolio(isLive);
                     // Settle positions with any known live prices
                     const active = st.active_positions || [];
                     const remaining = [];
@@ -334,17 +342,19 @@ gateway_script = """
                         }
                     }
                     st.active_positions = remaining;
-                    savePortfolio(st);
+                    st.is_live_account = isLive;
+                    savePortfolio(st, isLive);
                     return new Response(JSON.stringify(st), {
                         status: 200,
                         headers: { "Content-Type": "application/json" }
                     });
                 }
 
-                // 5. /api/order (Create order)
-                if (url.includes("/api/order") && !url.includes("/api/order/") && init?.method === "POST") {
+                // 5. /api/order & /api/live/order
+                if ((url.includes("/api/order") || url.includes("/api/live/order")) && !url.includes("/api/order/") && init?.method === "POST") {
+                    const isLive = url.includes("/api/live/order");
                     const body = JSON.parse(init.body || "{}");
-                    const st = loadPortfolio();
+                    const st = loadPortfolio(isLive);
                     const sym = (body.symbol || "BTCUSDT").toUpperCase();
                     const entryP = parseFloat(body.entry_price || liveTickerMap[sym]?.lastPrice || FALLBACK_PRICES[sym] || 100);
                     const vol = parseFloat(body.volume || 0.01);
@@ -355,7 +365,7 @@ gateway_script = """
                     const fee = notional * 0.0005;
 
                     const newPos = {
-                        pos_id: "POS-" + Math.floor(100000 + Math.random() * 900000),
+                        pos_id: (isLive ? "REAL-" : "POS-") + Math.floor(100000 + Math.random() * 900000),
                         symbol: sym,
                         side: side,
                         order_type: body.order_type || "MARKET",
@@ -369,24 +379,24 @@ gateway_script = """
                         unrealized_pnl: -Math.round(fee * 100) / 100,
                         entry_time: new Date().toLocaleTimeString(),
                         is_risk_free: false,
+                        is_real: isLive,
                         tranches: {
                             queen: { tp_price: body.tp_price ? parseFloat(body.tp_price) : null }
                         }
                     };
 
                     st.active_positions.push(newPos);
-                    savePortfolio(st);
+                    savePortfolio(st, isLive);
                     return new Response(JSON.stringify({ status: "SUCCESS", pos_id: newPos.pos_id, message: "Order executed at $" + entryP }), {
                         status: 200,
                         headers: { "Content-Type": "application/json" }
                     });
-                }
-
                 // 6. /api/order/close & /api/live/close
                 if (url.includes("/close")) {
                     const body = JSON.parse(init?.body || "{}");
                     const posId = body.pos_id;
-                    const st = loadPortfolio();
+                    const isLive = url.includes("/live/") || (posId && String(posId).startsWith("REAL-"));
+                    const st = loadPortfolio(isLive);
                     const active = st.active_positions || [];
                     const remaining = [];
                     let closedPos = null;
@@ -435,7 +445,7 @@ gateway_script = """
                             exit_reason: "Manual Close"
                         });
                         st.active_positions = remaining;
-                        savePortfolio(st);
+                        savePortfolio(st, isLive);
                         return new Response(JSON.stringify({ status: "SUCCESS", message: "Position closed" }), {
                             status: 200,
                             headers: { "Content-Type": "application/json" }

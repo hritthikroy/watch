@@ -188,7 +188,7 @@ function _showReconnectBanner(show) {
             const account = document.getElementById('disp-tradew-floating');
             if (nav) { nav.textContent = text; nav.className = `nav-stat-val ${className}`; }
             if (dock) { dock.textContent = text; dock.className = className; }
-            if (account && currentActiveAccount !== 'standard') {
+            if (account) {
                 account.textContent = `${totalPnl >= 0 ? '+' : '-'}${Math.abs(totalPnl).toFixed(2)}`;
                 account.style.color = totalPnl >= 0 ? '#00C076' : '#EF5350';
             }
