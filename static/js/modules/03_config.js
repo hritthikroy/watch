@@ -176,7 +176,9 @@ function _showReconnectBanner(show) {
             if (!Number.isFinite(entry) || !Number.isFinite(price) || !Number.isFinite(lot) || entry <= 0 || price <= 0) return 0;
             const isSell = (position.side === 'SELL' || position.side === 'SHORT');
             const directionalMove = isSell ? (entry - price) : (price - entry);
-            const pnl = directionalMove * lot * getLotContractSize(position.symbol);
+            const isReal = Boolean(position?.is_real || (position?.pos_id && String(position.pos_id).startsWith("REAL-")));
+            const contractSize = isReal ? 1.0 : (Number(position?.contract_size) || getLotContractSize(position.symbol));
+            const pnl = directionalMove * lot * contractSize;
             return Number.isFinite(pnl) ? pnl : 0;
         }
 

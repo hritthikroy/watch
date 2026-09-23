@@ -25,7 +25,6 @@ function _clearActiveChartLines() {
             _mousedownPl = null;
             _mousedownY = null;
             _setChartNavigationLocked(false);
-            _hideDragLevelFront();
             _clearActiveChartLines();
             // Keep the previously rendered canvas until a verified new batch
             // is ready. This is an internal atomic reload, not a white/blank

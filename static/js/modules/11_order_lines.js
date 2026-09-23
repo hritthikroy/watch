@@ -131,35 +131,45 @@ function updateOnChartOrderLines() {
                 });
             } catch (error) {}
 
-            // Synchronize activePriceLines cleanly (exact 1:1 match by posId + lineType, no ghost lines)
-            let canReconcile = (activePriceLines.length === newLines.length);
-            if (canReconcile) {
-                for (let i = 0; i < newLines.length; i++) {
-                    const existingMeta = activePriceLines[i]?._meta;
-                    const nextMeta = newLines[i]?._meta;
-                    if (existingMeta?.posId !== nextMeta?.posId || existingMeta?.lineType !== nextMeta?.lineType) {
-                        canReconcile = false;
-                        break;
-                    }
+            // Incremental Smart Reconciliation: Never wipe and recreate all lines!
+            // This guarantees 100% flicker-free rendering when adding, dragging, or modifying lines.
+            const remainingExisting = [];
+            const matchedNewIndices = new Set();
+
+            for (const pl of activePriceLines) {
+                const pMeta = pl._meta;
+                const matchIdx = newLines.findIndex((nl, idx) => 
+                    !matchedNewIndices.has(idx) &&
+                    String(nl._meta?.posId) === String(pMeta?.posId) &&
+                    nl._meta?.lineType === pMeta?.lineType
+                );
+
+                if (matchIdx !== -1) {
+                    matchedNewIndices.add(matchIdx);
+                    const nl = newLines[matchIdx];
+                    try {
+                        pl.applyOptions(nl);
+                        pl._meta = nl._meta;
+                    } catch(e) {}
+                    remainingExisting.push(pl);
+                } else {
+                    // Line no longer exists (e.g. SL or TP cleared or position closed)
+                    try { candleSeries.removePriceLine(pl); } catch(e) {}
                 }
             }
-            if (canReconcile) {
-                for (let i = 0; i < newLines.length; i++) {
+
+            // Create only truly new lines that didn't previously exist
+            for (let i = 0; i < newLines.length; i++) {
+                if (!matchedNewIndices.has(i)) {
                     try {
-                        activePriceLines[i].applyOptions(newLines[i]);
-                        activePriceLines[i]._meta = newLines[i]._meta;
-                    } catch(e) {}
-                }
-            } else {
-                _clearActiveChartLines();
-                for (const lineOpts of newLines) {
-                    try {
-                        const pl = candleSeries.createPriceLine(lineOpts);
-                        pl._meta = lineOpts._meta;
-                        activePriceLines.push(pl);
+                        const pl = candleSeries.createPriceLine(newLines[i]);
+                        pl._meta = newLines[i]._meta;
+                        remainingExisting.push(pl);
                     } catch(e) {}
                 }
             }
+
+            activePriceLines = remainingExisting;
         }
 
         // Aliases for seamless integration        // Aliases for seamless integration with existing hooks

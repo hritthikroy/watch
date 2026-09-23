@@ -265,7 +265,9 @@ function _showReconnectBanner(show) {
             if (!Number.isFinite(entry) || !Number.isFinite(price) || !Number.isFinite(lot) || entry <= 0 || price <= 0) return 0;
             const isSell = (position.side === 'SELL' || position.side === 'SHORT');
             const directionalMove = isSell ? (entry - price) : (price - entry);
-            const pnl = directionalMove * lot * getLotContractSize(position.symbol);
+            const isReal = Boolean(position?.is_real || (position?.pos_id && String(position.pos_id).startsWith("REAL-")));
+            const contractSize = isReal ? 1.0 : (Number(position?.contract_size) || getLotContractSize(position.symbol));
+            const pnl = directionalMove * lot * contractSize;
             return Number.isFinite(pnl) ? pnl : 0;
         }
 
@@ -4265,7 +4267,9 @@ function getSymbolTickSpec(sym) {
                 const isLong = (String(meta.side).toUpperCase() === 'BUY' || String(meta.side).toUpperCase() === 'LONG');
                 const lot = Number(meta.lot) || 0.01;
                 const difference = isLong ? Number(price) - meta.entryPrice : meta.entryPrice - Number(price);
-                const pnl = difference * lot * getLotContractSize(meta.symbol);
+                const isReal = Boolean(meta.is_real || (meta.posId && String(meta.posId).startsWith("REAL-")));
+                const contractSize = isReal ? 1.0 : getLotContractSize(meta.symbol);
+                const pnl = difference * lot * contractSize;
                 const sign = pnl >= 0 ? '+' : '';
                 const nextHtml = `${type} ${lot}&nbsp;&nbsp;Est: ${sign}${pnl.toFixed(2)}`;
                 if (label.innerHTML !== nextHtml) label.innerHTML = nextHtml;
@@ -4722,8 +4726,6 @@ function getSymbolTickSpec(sym) {
                             axisLabelTextColor: '#FFFFFF',
                         });
                     } catch(er) {}
-
-                    _hideDragLevelFront();
                     if (_elbPos && _elbPos.posId === _dragState.meta.posId) {
                         if (_dragState.meta.lineType === 'SL') _elbPos.slP = price;
                         if (_dragState.meta.lineType === 'TP') _elbPos.tpP = price;
@@ -4778,7 +4780,6 @@ function getSymbolTickSpec(sym) {
                         // SL/TP are direct-manipulation handles: a click alone
                         // does not open another editor or alter the order.
                         _mousedownPl = null; _mousedownY = null;
-                        _hideDragLevelFront();
                         return;
                     }
 
@@ -4796,7 +4797,6 @@ function getSymbolTickSpec(sym) {
 
                     const meta  = _dragState.meta;
                     const final = _dragState.currentPrice;
-                    _hideDragLevelFront();
 
                     if (final && meta) {
                         await _commitOrderLevelUpdate(meta, final);
@@ -4855,7 +4855,6 @@ function getSymbolTickSpec(sym) {
 
         startNanoTpsTicker();
         initSLTPDrag();
-        initMissingLevelDrag();
         _initEntryLineBar();
         _startElbLoop();
         });

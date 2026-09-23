@@ -54,7 +54,6 @@ function toggleSelectAccountModal(event) {
             if (typeof _clearActiveChartLines === 'function') _clearActiveChartLines();
             if (typeof _elbSetPosition === 'function') _elbSetPosition(null);
             if (typeof _hideOrderLineTickets === 'function') _hideOrderLineTickets();
-            if (typeof _hideChartLineCloseControls === 'function') _hideChartLineCloseControls();
 
             // 3. Clear bottom dock positions table and counter immediately
             const posTbody = document.getElementById("dock-pos-tbody");

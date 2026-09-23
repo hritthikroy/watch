@@ -423,7 +423,6 @@ function getSymbolTickSpec(sym) {
                         if (typeof _clearActiveChartLines === 'function') _clearActiveChartLines();
                         if (typeof _elbSetPosition === 'function') _elbSetPosition(null);
                         if (typeof _hideOrderLineTickets === 'function') _hideOrderLineTickets();
-                        if (typeof _hideChartLineCloseControls === 'function') _hideChartLineCloseControls();
                     } else {
                         const newPosIds = positions.map(p => `${p.pos_id}:${p.sl_price}:${p.tp_price || (p.tranches?.queen?.tp_price)}:${p.is_risk_free}`).join("|");
                         const needsFullRebuild = newPosIds !== _lastRenderedPosIds;
