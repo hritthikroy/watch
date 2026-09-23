@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch WebTrader - Institutional Crypto Execution Terminal</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230ECB81'/><text x='50%' y='68%' font-size='55' font-weight='900' fill='%23121318' text-anchor='middle'>W</text></svg>">
+    <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        :root {
+            --bg-primary: #121318;
+            --bg-secondary: #181A20;
+            --bg-card: #1E2329;
+            --border-color: #2B313A;
+            --text-primary: #EAECEF;
+            --text-secondary: #848E9C;
+            --color-green: #0ECB81;
+            --color-red: #F6465D;
+            --color-gold: #F0B90B;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            height: 48px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+        }
+        .brand-logo {
+            width: 24px;
+            height: 24px;
+            background: var(--color-green);
+            color: #121318;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 14px;
+        }
+        .badge {
+            background: rgba(14, 203, 129, 0.15);
+            color: var(--color-green);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .price-badge {
+            font-family: "Roboto Mono", monospace;
+            font-weight: 800;
+            font-size: 15px;
+            color: var(--color-green);
+        }
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 240px 1fr 280px;
+            overflow: hidden;
+        }
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 12px;
+            overflow-y: auto;
+        }
+        .wl-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .wl-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s;
+            margin-bottom: 2px;
+        }
+        .wl-item:hover, .wl-item.active { background: rgba(255, 255, 255, 0.05); }
+        .wl-sym { font-weight: 700; font-size: 13px; }
+        .wl-p { font-family: "Roboto Mono", monospace; font-size: 12px; }
+        .chart-area {
+            position: relative;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-header {
+            height: 42px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+        .chart-sym-name { font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        #chart-container { flex: 1; width: 100%; height: 100%; position: relative; }
+        .order-col {
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-color);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .btn-trade {
+            width: 100%;
+            padding: 12px;
+            border-radius: 4px;
+            border: none;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-buy { background: var(--color-green); color: #121318; }
+        .btn-sell { background: var(--color-red); color: #fff; }
+        .btn-trade:hover { opacity: 0.9; }
+        .stat-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+        }
+        .stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 4px; }
+        .stat-val { font-size: 16px; font-weight: 800; font-family: "Roboto Mono", monospace; }
+        footer {
+            height: 28px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <div class="brand-logo">W</div>
+            <span>WATCH WEBTRADER</span>
+            <span class="badge">LIVE EXECUTION</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 12px; color: var(--text-secondary);">BTC/USDT Perpetuals</div>
+            <div class="price-badge" id="header-price">85,820.0</div>
+            <span class="badge" style="background: rgba(240, 185, 11, 0.15); color: var(--color-gold);">INSTITUTIONAL CORE</span>
+        </div>
+    </header>
+
+    <main>
+        <aside class="sidebar">
+            <div class="wl-title">Markets (Watchlist)</div>
+            <div class="wl-item active" onclick="switchPair('BTCUSDT')">
+                <span class="wl-sym">BTC/USDT</span>
+                <span class="wl-p" id="wl-btc" style="color: var(--color-green);">85,820.0</span>
+            </div>
+            <div class="wl-item" onclick="switchPair('ETHUSDT')">
+                <span class="wl-sym">ETH/USDT</span>
+                <span class="wl-p" id="wl-eth" style="color: var(--color-green);">2,722.5</span>
+            </div>
+            <div class="wl-item" onclick="switchPair('SOLUSDT')">
+                <span class="wl-sym">SOL/USDT</span>
+                <span class="wl-p" id="wl-sol" style="color: var(--color-green);">116.85</span>
+            </div>
+            <div class="wl-item" onclick="switchPair('BNBUSDT')">
+                <span class="wl-sym">BNB/USDT</span>
+                <span class="wl-p" id="wl-bnb" style="color: var(--color-green);">784.9</span>
+            </div>
+        </aside>
+
+        <section class="chart-area">
+            <div class="chart-header">
+                <div class="chart-sym-name">
+                    <span id="chart-sym-title">BTC/USDT Perpetual</span>
+                    <span class="badge" style="font-size: 10px;">1m Interval</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-secondary);">
+                    <span>Latency: </span><span style="color: var(--color-green); font-weight: 700;">Sub-Millisecond Direct Stream</span>
+                </div>
+            </div>
+            <div id="chart-container"></div>
+        </section>
+
+        <aside class="order-col">
+            <div class="stat-box">
+                <div class="stat-label">Trading Capital</div>
+                <div class="stat-val">$100,000.00</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Market Price</div>
+                <div class="stat-val" id="order-price" style="color: var(--color-green);">85,820.0</div>
+            </div>
+            <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+                <button class="btn-trade btn-buy" onclick="alert('Order placed: BUY 0.01 lot')">BUY / LONG</button>
+                <button class="btn-trade btn-sell" onclick="alert('Order placed: SELL 0.01 lot')">SELL / SHORT</button>
+            </div>
+            <div style="margin-top: auto; font-size: 11px; color: var(--text-secondary); line-height: 1.5;">
+                Watch WebTrader is built for low-latency institutional crypto perpetual execution with real-time WebSocket tick feeds.
+            </div>
+        </aside>
+    </main>
+
+    <footer>
+        <div>&copy; 2026 Watch. All Rights Reserved.</div>
+        <div>Engine: Watch Nanosecond IPC &bull; Feed: Binance Direct Streams</div>
+    </footer>
+
+    <script>
+        let currentPair = 'BTCUSDT';
+        let chart = null;
+        let candleSeries = null;
+        let ws = null;
+        let currentCandle = null;
+
+        function initChart() {
+            const container = document.getElementById('chart-container');
+            chart = LightweightCharts.createChart(container, {
+                width: container.clientWidth,
+                height: container.clientHeight,
+                layout: {
+                    background: { color: '#121318' },
+                    textColor: '#848E9C'
+                },
+                grid: {
+                    vertLines: { color: 'rgba(255, 255, 255, 0.04)' },
+                    horzLines: { color: 'rgba(255, 255, 255, 0.04)' }
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                    vertLine: { visible: false },
+                    horzLine: { color: '#848E9C', style: 2 }
+                },
+                rightPriceScale: {
+                    borderColor: '#2B313A',
+                    scaleMargins: { top: 0.08, bottom: 0.08 }
+                },
+                timeScale: {
+                    borderColor: '#2B313A',
+                    timeVisible: true
+                }
+            });
+
+            candleSeries = chart.addCandlestickSeries({
+                upColor: '#0ECB81',
+                downColor: '#F6465D',
+                borderUpColor: '#0ECB81',
+                borderDownColor: '#F6465D',
+                wickUpColor: '#0ECB81',
+                wickDownColor: '#F6465D'
+            });
+
+            window.addEventListener('resize', () => {
+                if (chart && container) {
+                    chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
+                }
+            });
+
+            loadPairData(currentPair);
+        }
+
+        async function loadPairData(pair) {
+            try {
+                const res = await fetch(`https://fapi.binance.com/fapi/v1/klines?symbol=${pair}&interval=1m&limit=100`);
+                const raw = await res.json();
+                const candles = raw.map(b => ({
+                    time: Math.floor(b[0] / 1000),
+                    open: parseFloat(b[1]),
+                    high: parseFloat(b[2]),
+                    low: parseFloat(b[3]),
+                    close: parseFloat(b[4])
+                }));
+                candleSeries.setData(candles);
+                if (candles.length > 0) {
+                    currentCandle = Object.assign({}, candles[candles.length - 1]);
+                    updateDisplayPrice(currentCandle.close);
+                }
+            } catch (e) {
+                console.warn('REST kline fallback:', e);
+            }
+            startWebSocket(pair);
+        }
+
+        function startWebSocket(pair) {
+            if (ws) {
+                try { ws.close(); } catch(e) {}
+            }
+            const s = pair.toLowerCase();
+            ws = new WebSocket(`wss://fstream.binance.com/stream?streams=${s}@kline_1m/${s}@aggTrade`);
+            ws.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    const d = msg.data || msg;
+                    if (d.e === 'aggTrade') {
+                        const price = parseFloat(d.p);
+                        updateDisplayPrice(price);
+                        if (currentCandle) {
+                            if (price > currentCandle.high) currentCandle.high = price;
+                            if (price < currentCandle.low) currentCandle.low = price;
+                            currentCandle.close = price;
+                            candleSeries.update(currentCandle);
+                        }
+                    } else if (d.e === 'kline') {
+                        const k = d.k;
+                        currentCandle = {
+                            time: Math.floor(k.t / 1000),
+                            open: parseFloat(k.o),
+                            high: parseFloat(k.h),
+                            low: parseFloat(k.l),
+                            close: parseFloat(k.c)
+                        };
+                        candleSeries.update(currentCandle);
+                        updateDisplayPrice(currentCandle.close);
+                    }
+                } catch(e) {}
+            };
+        }
+
+        function updateDisplayPrice(p) {
+            const str = p > 100 ? p.toFixed(1) : p.toFixed(2);
+            document.getElementById('header-price').innerText = str;
+            document.getElementById('order-price').innerText = str;
+        }
+
+        function switchPair(pair) {
+            currentPair = pair;
+            document.getElementById('chart-sym-title').innerText = `${pair} Perpetual`;
+            loadPairData(pair);
+        }
+
+        window.onload = initChart;
+    </script>
+</body>
+</html>
