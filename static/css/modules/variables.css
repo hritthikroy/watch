@@ -1,0 +1,362 @@
+/* CSS Variables - DARK THEME (DEFAULT) */
+        :root {
+            --bg-main: #0B0E11;
+            --bg-card: #181A20;
+            --bg-card-alt: #1E2329;
+            --bg-dock: #141517;
+            --border-color: #2B313A;
+            --border-subtle: rgba(255, 255, 255, 0.05);
+            --binance-gold: #F0B90B;
+            --binance-green: #0ECB81;
+            --binance-red: #F6465D;
+            --text-primary: #EAECEF;
+            --text-secondary: #848E9C;
+            --text-muted: #5E6673;
+            --cyan-accent: #00F0FF;
+            --chart-bg: #181A20;
+            --chart-grid: rgba(255, 255, 255, 0.04);
+            --chart-text: #848E9C;
+            --chart-border: #2B313A;
+            --dock-header-bg: #181A20;
+            --hover-bg: rgba(255, 255, 255, 0.04);
+            --active-item-bg: rgba(240, 185, 11, 0.08);
+            --watermark-opacity: 0.04;
+        }
+
+        /* AESTHETIC EYE-FRIENDLY LIGHT THEME (Zero Glare, Soft Velvet Matte) */
+        body.theme-light {
+            --bg-main: #F0F2F5;
+            --bg-card: #FFFFFF;
+            --bg-card-alt: #F4F6F9;
+            --bg-dock: #F7F9FB;
+            --border-color: #E2E6ED;
+            --border-subtle: #EBEEF3;
+            --binance-gold: #D97706;
+            --binance-green: #00C076;
+            --binance-red: #EF5350;
+            --text-primary: #1E2329;
+            --text-secondary: #707A8A;
+            --text-muted: #929AA5;
+            --cyan-accent: #0284C7;
+            --chart-bg: #FFFFFF;
+            --chart-grid: rgba(0, 0, 0, 0.035);
+            --chart-text: #707A8A;
+            --chart-border: #E2E6ED;
+            --dock-header-bg: #F4F6F9;
+            --hover-bg: #EAEFF5;
+            --active-item-bg: rgba(240, 185, 11, 0.08);
+            --watermark-opacity: 0.04;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            height: 100vh;
+            max-height: 100vh;
+            overflow: hidden;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            user-select: none;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        /* &#9889; Nanosecond Tick Pulse Flashes */
+        @keyframes tickFlashUp {
+            0% { background-color: rgba(0, 255, 163, 0.45); }
+            100% { background-color: transparent; }
+        }
+        @keyframes tickFlashDown {
+            0% { background-color: rgba(239, 83, 80, 0.45); }
+            100% { background-color: transparent; }
+        }
+        .flash-tick-up {
+            animation: tickFlashUp 0.32s ease-out;
+        }
+        .flash-tick-down {
+            animation: tickFlashDown 0.32s ease-out;
+        }
+
+        /* &#9889; Nanosecond Telemetry Badge */
+        .nano-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.28);
+            padding: 2px 9px;
+            border-radius: 12px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: #00F0FF;
+            letter-spacing: 0.3px;
+            user-select: none;
+        }
+        .nano-pulse-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00FF88;
+            box-shadow: 0 0 8px #00FF88;
+            animation: nanoPulse 1.2s infinite alternate;
+        }
+        @keyframes nanoPulse {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            100% { transform: scale(1.3); opacity: 1; }
+        }
+
+        /* &#9889; Ultra-Nano Direct Stream Telemetry Badge (Hidden) */
+        .nano-stream-badge {
+            display: none;
+        }
+        .nano-stream-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00FF88;
+            box-shadow: 0 0 8px #00FF88;
+            animation: nanoPulse 1s infinite alternate;
+        }
+
+        /* Top Navigation Bar (48px fixed - 100% TradeW Match to media_1789955909263.png) */
+        .navbar {
+            height: 48px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 100;
+            gap: 16px;
+            box-sizing: border-box;
+            white-space: nowrap;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            gap: 18px;
+            flex-shrink: 0;
+        }
+        .tradew-brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: ns-resize;
+            touch-action: none;
+            user-select: none;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .tradew-brand-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            white-space: nowrap;
+        }
+        .nano-hud-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 192, 118, 0.12);
+            border: 1px solid rgba(0, 192, 118, 0.35);
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #00C076;
+            font-family: 'Roboto Mono', monospace;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .nano-hud-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00C076;
+            box-shadow: 0 0 6px #00C076;
+            animation: nanoPulse 1.2s infinite alternate;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .tradew-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            height: 100%;
+            flex-shrink: 0;
+        }
+        .tradew-nav-link {
+            color: #929AA5;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: grab;
+            transition: color 0.15s;
+            user-select: none;
+            white-space: nowrap;
+            height: 100%;
+            display: inline-flex;
+            align-items: center;
+            border-bottom: 2px solid transparent;
+            padding: 0 2px;
+            box-sizing: border-box;
+        }
+        .tradew-nav-link:hover {
+            color: var(--text-primary);
+        }
+        .tradew-nav-link.active {
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: 2px solid #00C076;
+        }
+        .tradew-btn-webtrader {
+            background: #00C076;
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s;
+            user-select: none;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+        }
+        .tradew-btn-webtrader:hover {
+            background: #00A666;
+        }
+        .tradew-nav-right-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            height: 100%;
+            flex-shrink: 0;
+        }
+        .tradew-nav-action-text {
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.15s;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .tradew-nav-action-text:hover {
+            color: #00C076;
+        }
+        .tradew-nav-icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.15s, background 0.15s;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .tradew-nav-icon-btn:hover {
+            color: var(--text-primary);
+            background: var(--hover-bg);
+        }
+        .tradew-user-avatar {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .tradew-user-avatar:hover {
+            transform: scale(1.08);
+        }
+
+        /* Nav Stats Badges */
+        .nav-stats { display: flex; align-items: center; gap: 10px; }
+        .nav-stat-pill {
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 4px 9px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .nav-stat-lbl { color: var(--text-secondary); text-transform: uppercase; font-size: 10px; }
+        .nav-stat-val { font-weight: 800; font-family: 'Roboto Mono', monospace; }
+
+        .nav-right { display: flex; align-items: center; gap: 8px; }
+        .rust-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            color: #FF5722;
+            font-weight: 800;
+            background: rgba(255,87,34,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,87,34,0.4);
+            font-family: 'Roboto Mono', monospace;
+        }
+        .heartbeat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--binance-green);
+            font-weight: 700;
+            background: rgba(14,203,129,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--binance-green);
+        }
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--binance-green);
+            border-radius: 50%;
+            box-shadow: 0 0 6px var(--binance-green);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.3); } 100% { opacity: 1; transform: scale(1); } }
+        
+        .btn-nav {
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-nav:hover { background: var(--hover-bg); border-color: var(--text-secondary); }
+        .btn-nav-theme {
+            font-weight: 700;
+            background: rgba(240,185,11,0.12);
+            color: var(--binance-gold);
+            border-color: var(--binance-gold);
+        }
+        .btn-nav-danger { background: rgba(246,70,93,0.15); color: var(--binance-red); border-color: var(--binance-red); }
+        .btn-nav-danger:hover { background: rgba(246,70,93,0.25); }
+

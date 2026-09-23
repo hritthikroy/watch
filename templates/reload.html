@@ -1,0 +1,23 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Cache & Reload</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Force reload with cache clear
+        setTimeout(() => {
+            location.replace('/?' + new Date().getTime());
+        }, 1000);
+    </script>
+</head>
+<body style="background:#0B0E11;color:#fff;font-family:monospace;padding:50px;text-align:center;">
+    <h1>🔄 Clearing Cache...</h1>
+    <p>Reloading with fresh JavaScript...</p>
+    <p style="margin-top:30px;font-size:12px;">
+        If page doesn't reload:<br>
+        Press Ctrl+Shift+R or Ctrl+F5
+    </p>
+</body>
+</html>

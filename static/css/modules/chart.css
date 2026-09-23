@@ -1,0 +1,334 @@
+        /* COLUMN 2: Center Hero Column (Chart Stage) */
+        .center-stage {
+            grid-column: 2;
+            grid-row: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+            background: var(--chart-bg);
+        }
+
+        /* Top Sub-Header & Ticker Strip */
+        .stage-toolbar {
+            height: 40px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            flex-shrink: 0;
+            gap: 12px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .stage-toolbar::-webkit-scrollbar {
+            display: none;
+        }
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .stage-symbol-badge {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tf-pills { display: flex; gap: 2px; }
+        .tf-pill {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            padding: 3px 7px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .tf-pill:hover { color: var(--text-primary); background: var(--bg-card-alt); }
+        .tf-pill.active { background: var(--border-color); color: var(--text-primary); border-color: var(--text-secondary); }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 11px;
+        }
+        .stat-group { display: flex; flex-direction: column; line-height: 1.2; }
+        .stat-grp-lbl { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; }
+        .stat-grp-val { font-weight: 700; font-family: 'Roboto Mono', monospace; }
+        .hero-price { font-size: 14px; font-weight: 800; }
+
+        /* Chart Canvas Area */
+        .chart-stage-wrap {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+            background: var(--chart-bg);
+            overflow: hidden;
+        }
+        #tv-chart {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--chart-bg);
+            min-width: 400px;
+            min-height: 300px;
+        }
+        #tv-iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+            z-index: 2;
+        }
+
+        /* Binance Futures Web Iframe Container */
+        #binance-iframe-wrap {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+            z-index: 2;
+            background: #181A20;
+        }
+        #binance-iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #181A20;
+        }
+        .binance-iframe-bar {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: auto;
+        }
+        .binance-iframe-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(24, 26, 32, 0.9);
+            backdrop-filter: blur(4px);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .binance-tag {
+            color: #F0B90B;
+            font-size: 10px;
+            letter-spacing: 0.5px;
+        }
+        .binance-sym {
+            color: #EAECEF;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 800;
+        }
+        .binance-ext-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            background: rgba(240, 185, 11, 0.15);
+            border: 1px solid rgba(240, 185, 11, 0.4);
+            border-radius: 4px;
+            color: #F0B90B;
+            font-size: 11px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+        .binance-ext-btn:hover {
+            background: #F0B90B;
+            color: #000;
+        }
+
+        /* Multi-Chart Mode Selector */
+        .chart-view-modes {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 2px 3px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            margin-left: 6px;
+        }
+        .chart-mode-pill {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+        }
+        .chart-mode-pill:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .chart-mode-pill.active {
+            background: var(--border-color);
+            color: var(--text-primary);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        .chart-mode-pill.active#btn-mode-binance {
+            color: #F0B90B;
+            border-color: rgba(240, 185, 11, 0.35);
+            background: rgba(240, 185, 11, 0.12);
+        }
+
+        #chart-indicator-legend {
+            display: none !important;
+        }
+
+        /* When viewing iframe chart, hide all native overlay elements so there is zero overlap */
+        #chart-wrapper.iframe-mode .chart-watermark,
+        #chart-wrapper.iframe-mode #chart-indicator-legend,
+        #chart-wrapper.iframe-mode #tradew-chart-brand-badge,
+        #chart-wrapper.iframe-mode .tradew-lines-layer,
+        #chart-wrapper.iframe-mode .chart-high-low-overlay,
+        .chart-stage-wrap.iframe-mode .chart-watermark,
+        .chart-stage-wrap.iframe-mode #chart-indicator-legend,
+        .chart-stage-wrap.iframe-mode #tradew-chart-brand-badge,
+        .chart-stage-wrap.iframe-mode .tradew-lines-layer,
+        .chart-stage-wrap.iframe-mode .chart-high-low-overlay {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        /* Binance Center Watermark */
+        .chart-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+            opacity: var(--watermark-opacity);
+            z-index: 1;
+            user-select: none;
+        }
+        .chart-watermark svg { width: 140px; height: 140px; fill: var(--text-primary); }
+
+        /* On-Chart TradeW dashed order lines overlay */
+        .tradew-lines-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 50;
+            overflow: hidden;
+        }
+        .tradew-line-row {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            transform: translate3d(0, 0, 0) translateY(-50%);
+            pointer-events: none;
+            transition: none; /* ZERO BUFFERING / ZERO LAG */
+            will-change: transform;
+            contain: layout style;
+            height: 18px;
+        }
+        .tradew-badge-left {
+            pointer-events: auto;
+            cursor: pointer;
+            height: 18px;
+            box-sizing: border-box;
+            border-radius: 2px;
+            white-space: nowrap;
+            margin-left: 0; /* Flush to left edge like TradeW */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            user-select: none;
+            display: inline-flex;
+            align-items: stretch;
+            background: #FFFFFF;
+            border: 1px solid rgba(0,0,0,0.22);
+            overflow: hidden;
+        }
+        .tradew-tag-label {
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #FFFFFF;
+            letter-spacing: 0.1px;
+            white-space: nowrap;
+        }
+        .tradew-tag-val {
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            font-size: 10px;
+            font-weight: 600;
+            font-family: 'Roboto Mono', monospace;
+            color: #111827;
+            background: #FFFFFF;
+            white-space: nowrap;
+            border-left: 1px solid rgba(0,0,0,0.15);
+        }
+        .tradew-dashed-line {
+            flex: 1;
+            height: 0;
+            border-bottom: 1px dotted; /* Ultra-thin 1px hairline dotted line like TradeW */
+            margin: 0;
+            opacity: 0.88;
+        }
+        .tradew-badge-right {
+            pointer-events: auto;
+            font-size: 10px;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 700;
+            padding: 0 5px;
+            height: 18px;
+            line-height: 18px;
+            box-sizing: border-box;
+            border-radius: 2px;
+            margin-right: 0; /* Flush to right price axis */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            user-select: none;
+            letter-spacing: 0.2px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            color: #FFFFFF;
+        }
+

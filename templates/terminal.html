@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Watch · Autonomous Web Trader</title>
+    
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'><circle cx='16' cy='16' r='15' fill='%230B0E11' stroke='%2300C076' stroke-width='2'/><path d='M8 10 L12 22 L16 13 L20 22 L24 10' stroke='%2300C076' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+    
+    <!-- &#128737;ï¸ Complete Browser Extension Noise & Crash Shield (MetaMask/Web3/Grammarly/ContentScripts) -->
+    <script>
+        (function() {
+            // Complete console override - suppress EVERYTHING from extensions
+            const originalConsole = {
+                log: console.log,
+                error: console.error,
+                warn: console.warn,
+                info: console.info,
+                debug: console.debug
+            };
+
+            // Block all extension-related noise with comprehensive patterns
+            const extensionPatterns = [
+                /contentscript/i,
+                /webpack_require/i,
+                /MaxListenersExceededWarning/i,
+                /ObjectMultiplex/i,
+                /Grammarly/i,
+                /chrome-extension/i,
+                /moz-extension/i,
+                /app-init-liveness/i,
+                /background-liveness/i,
+                /orphaned data/i,
+                /Permissions policy violation/i,
+                /addListener/i,
+                /EventEmitter/i,
+                /memory leak/i,
+                /close listeners added/i,
+                /end listeners added/i,
+                /unload is not allowed/i,
+                /message channel closed/i,
+                /asynchronous response/i,
+                /listener indicated/i,
+                /Extension context invalidated/i,
+                /MutationObserver/i,
+                /parameter 1 is not of type/i,
+                /pipe/i,
+                /write/i,
+                /emit/i,
+                /push/i,
+                /transform/i,
+                /_webpack/i,
+                /__webpack_require__/i,
+                /webpack_require_/i,
+                /\.js:/i,
+                /chunk/i,
+                /vendor/i,
+                /polyfill/i
+            ];
+
+            function isExtensionNoise(args) {
+                const message = args.map(arg => 
+                    typeof arg === 'string' ? arg : 
+                    (arg.message || String(arg) || '')
+                ).join(' ');
+                return extensionPatterns.some(pattern => pattern.test(message));
+            }
+
+            // Override all console methods
+            ['log', 'error', 'warn', 'info', 'debug'].forEach(method => {
+                console[method] = function(...args) {
+                    if (isExtensionNoise(args)) return;
+                    originalConsole[method].apply(console, args);
+                };
+            });
+
+            // Intercept all errors with broader pattern matching
+            window.addEventListener('error', function(e) {
+                const message = e.message || String(e);
+                const filename = e.filename || '';
+                const combined = message + ' ' + filename;
+                if (extensionPatterns.some(pattern => pattern.test(combined))) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return true;
+                }
+            }, true);
+
+            // Intercept promise rejections with broader pattern matching
+            window.addEventListener('unhandledrejection', function(e) {
+                const reason = String(e.reason || '');
+                if (extensionPatterns.some(pattern => pattern.test(reason))) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return true;
+                }
+            }, true);
+
+            // Increase max listeners to prevent warnings
+            if (typeof process !== 'undefined' && process.setMaxListeners) {
+                process.setMaxListeners(100);
+            }
+            
+            // Suppress any remaining extension noise
+            const originalError = Error;
+            window.Error = function(...args) {
+                const message = args.join(' ');
+                if (extensionPatterns.some(pattern => pattern.test(message))) {
+                    return originalError();
+                }
+                return originalError.apply(this, args);
+            };
+        })();
+    </script>
+
+    <!-- Official TradingView Lightweight Charts Library (Local) -->
+    <script src="/static/lightweight-charts.js?v=20260922q"></script>
+
+    <link rel="stylesheet" href="/static/css/terminal.css?v=20260923v">
+</head>
+<body class="theme-dark">
+
+    <!-- TOP NAVBAR (48px - 100% TradeW Match to media_1789955909263.png) -->
+    <header class="navbar tradew-navbar">
+        <div class="nav-left">
+            <!-- Watch Authentic Brand Logo with W icon -->
+            <div class="tradew-brand-wrap" onclick="window.location.reload()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M3.5 6 L7.5 18 L12 9.5 L16.5 18 L20.5 6" stroke="#00C076" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="tradew-brand-text">Watch</span>
+            </div>
+
+            <!-- Navigation Category Tabs -->
+            <div class="tradew-nav-links">
+                <span class="tradew-nav-link active">Trading</span>
+                <span class="tradew-nav-link">Market</span>
+                <span class="tradew-nav-link">Platforms</span>
+                <span class="tradew-nav-link">Account</span>
+                <span class="tradew-nav-link">Trading Tools</span>
+                <span class="tradew-nav-link">Partnership</span>
+                <span class="tradew-nav-link">About Us</span>
+                <span class="tradew-btn-webtrader">Web Trader</span>
+            </div>
+        </div>
+
+        <!-- Right Side (Matches media_1789955909263.png + Extra Light/Dark Icon) -->
+        <div class="tradew-nav-right-group">
+            <span class="tradew-nav-action-text">Assets</span>
+            <span class="tradew-nav-action-text">Order</span>
+
+            <!-- Notifications Bell -->
+            <div class="tradew-nav-icon-btn" title="Notifications">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+            </div>
+
+            <!-- User Avatar Profile -->
+            <div class="tradew-nav-icon-btn" title="Account Profile">
+                <div class="tradew-user-avatar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="8" r="4" fill="#00C076"/>
+                        <path d="M4 20 C4 15.5 7.5 14 12 14 C16.5 14 20 15.5 20 20" fill="#848E9C"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Download App -->
+            <div class="tradew-nav-icon-btn" title="Download App">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+            </div>
+
+            <!-- Language / Globe -->
+            <div class="tradew-nav-icon-btn" title="Language: English">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+            </div>
+
+            <!-- &#10024; EXTRA ONE LIGHT AND DARK ICON (Matches User Request) -->
+            <div class="tradew-nav-icon-btn" id="btn-theme-toggle" onclick="toggleTheme()" title="Switch to Light Theme">
+                <svg id="theme-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+            </div>
+        </div>
+    </header>
+
+    <!-- 3-COLUMN MASTER LAYOUT -->
+    <div class="master-layout">
+
+        <!-- COLUMN 1: Trade W Market Watchlist (Matches Image 2) -->
+        <aside class="watchlist-col">
+            <!-- Search Bar at Top -->
+            <div class="tradew-search-bar">
+                <div class="tradew-search-input-box">
+                    <span class="tradew-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle cx="10.5" cy="10.5" r="5.5"></circle><path d="m15 15 5 5"></path></svg></span>
+                    <input type="text" class="tradew-search-input" id="watchlist-search" placeholder="Search" oninput="filterWatchlist()">
+                </div>
+            </div>
+
+            <!-- Scrollable Category Carousel: < All 37 Favorite Hot Major Layer 1 DeFi Alts > -->
+            <div class="tradew-cat-carousel">
+                <button class="tradew-arrow-btn" onclick="scrollWatchlistCats(-1)">&lt;</button>
+                <div class="tradew-cat-pills" id="tradew-cat-pills">
+                    <button class="tradew-cat-pill active" onclick="setWatchlistCategory('all', this)">All 37</button>
+                    <button class="tradew-cat-pill" onclick="setWatchlistCategory('favorite', this)">Favorite</button>
+                    <button class="tradew-cat-pill" onclick="setWatchlistCategory('hot', this)">Hot</button>
+                    <button class="tradew-cat-pill" onclick="setWatchlistCategory('major', this)">Major</button>
+                    <button class="tradew-cat-pill" onclick="setWatchlistCategory('layer1', this)">Layer 1</button>
+                    <button class="tradew-cat-pill" onclick="setWatchlistCategory('defi', this)">DeFi</button>
+                    <button class="tradew-cat-pill" onclick="setWatchlistCategory('alts', this)">Alts</button>
+                </div>
+                <button class="tradew-arrow-btn" onclick="scrollWatchlistCats(1)">&gt;</button>
+            </div>
+
+            <!-- 3-Column Header: Symbol | Latest price | 24H Change -->
+            <div class="tradew-wl-header">
+                <span>Symbol</span>
+                <span style="text-align: right;">Latest price</span>
+                <span style="text-align: right;">24H Change</span>
+            </div>
+
+            <!-- Items List -->
+            <div class="watchlist-items" id="watchlist-items">
+                <!-- Dynamically populated single-line 3-column rows matching Image 2 -->
+            </div>
+        </aside>
+
+        <!-- COLUMN 2: Center Hero Column (Toolbar + Chart + Bottom Dock) -->
+        <main class="center-stage">
+            
+            <div class="stage-toolbar">
+                <div class="toolbar-left" style="gap: 14px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #F0B90B; color: #000; font-weight: 800; font-size: 11px;" id="disp-coin-avatar">B</span>
+                        <div style="display: flex; flex-direction: column;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span class="stage-symbol-badge" id="chart-sym-title" style="font-size: 14px; font-weight: 800; color: var(--text-primary);">BTC/USDT Pro</span>
+                                <span style="color: #848E9C; font-size: 10px; cursor: pointer; text-decoration: underline;">Rules</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="hero-price-badge up" id="disp-last">--</span>
+                        <span style="font-size: 10px; color: #848E9C; font-family: 'Roboto Mono', monospace;" id="disp-inr-equiv">&#8776;--INR</span>
+                        <span class="nano-stream-badge" id="nano-stream-indicator" title="Ultra-Nano Direct Stream: Live tick execution from matching engine"><span class="nano-stream-dot"></span>&#9889; </span>
+                    </div>
+
+                    <div class="tf-pills" style="margin-left: 8px;">
+                        <button class="tf-pill active" onclick="switchTf('1m', this)">1m</button>
+                        <button class="tf-pill" onclick="switchTf('3m', this)">3m</button>
+                        <button class="tf-pill" onclick="switchTf('5m', this)">5m</button>
+                        <button class="tf-pill" onclick="switchTf('15m', this)">15m</button>
+                        <button class="tf-pill" onclick="switchTf('1h', this)">1h</button>
+                        <button class="tf-pill" onclick="switchTf('4h', this)">4h</button>
+                        <button class="tf-pill" onclick="switchTf('1d', this)">1D</button>
+                    </div>
+ 
+                    <div class="chart-view-modes" id="chart-view-modes">
+                        <button class="chart-mode-pill active" onclick="setChartMode('native')" id="btn-mode-native" title="Binance Original Execution Chart (0-Lag Direct Matching Engine)">
+                            <span>&#9889; Original</span>
+                        </button>
+                        <button class="chart-mode-pill" onclick="setChartMode('tv')" id="btn-mode-tv" title="TradingView Official Interactive Chart">
+                            <span class="tradingview-mark">TV</span><span>TradingView</span>
+                        </button>
+                        <a class="chart-mode-pill binance-direct-tab" id="btn-mode-binance-link" href="https://www.binance.com/en/futures/BTCUSDT" target="_blank" rel="noopener noreferrer" title="Open Live Binance Futures Terminal in New Tab (Bypasses Cloudflare iframe restrictions)">
+                            <svg width="12" height="12" viewBox="0 0 120 120" fill="none" style="vertical-align: -1px;">
+                                <path d="M60 15 L78 33 L60 51 L42 33 Z" fill="#F0B90B"/>
+                                <path d="M21 54 L39 72 L21 90 L3 72 Z" fill="#F0B90B"/>
+                                <path d="M99 54 L117 72 L99 90 L81 72 Z" fill="#F0B90B"/>
+                                <path d="M60 93 L78 111 L60 129 L42 111 Z" fill="#F0B90B"/>
+                                <path d="M60 57 L78 75 L60 93 L42 75 Z" fill="#F0B90B"/>
+                            </svg>
+                            <span>Binance Web ↗</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="toolbar-right">
+                    <div class="stat-group">
+                        <span class="stat-grp-lbl">24h Change</span>
+                        <span class="stat-grp-val val-green" id="disp-change">--%</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-grp-lbl">24h High</span>
+                        <span class="stat-grp-val" id="disp-high">--</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-grp-lbl">24h Low</span>
+                        <span class="stat-grp-val" id="disp-low">--</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-grp-lbl">24h Vol (USDT)</span>
+                        <span class="stat-grp-val" id="disp-vol">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Candlestick Chart with On-Chart Order Lines Overlay -->
+            <div class="chart-stage-wrap" id="chart-wrapper">
+                <!-- Binance Center Watermark -->
+                <div class="chart-watermark" style="opacity: 0.035; pointer-events: none;">
+                    <svg width="48" height="48" viewBox="0 0 120 120" fill="none">
+                        <path d="M60 15 L78 33 L60 51 L42 33 Z" fill="#F0B90B"/>
+                        <path d="M21 54 L39 72 L21 90 L3 72 Z" fill="#F0B90B"/>
+                        <path d="M99 54 L117 72 L99 90 L81 72 Z" fill="#F0B90B"/>
+                        <path d="M60 93 L78 111 L60 129 L42 111 Z" fill="#F0B90B"/>
+                        <path d="M60 57 L78 75 L60 93 L42 75 Z" fill="#F0B90B"/>
+                    </svg>
+                    <span style="font-size: 24px; font-weight: 900; letter-spacing: 5px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #EAECEF;">BINANCE</span>
+                </div>
+
+
+
+                <!-- Dynamic Binance High/Low Visible Markers Overlay -->
+                <div class="chart-high-low-overlay" id="chart-high-low-overlay"></div>
+
+                <!-- Native High-Speed Chart -->
+                <div id="tv-chart"></div>
+
+                <!-- TV Official Iframe fallback -->
+                <iframe id="tv-iframe"
+                    data-src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_1&symbol=BINANCE%3ABTCUSDT.P&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=0&toolbarbg=181A20&theme=dark&style=1&timezone=Etc%2FUTC&studies=%5B%5D&hideideas=1">
+                </iframe>
+
+                <!-- Binance Futures Official Web Iframe -->
+                <div id="binance-iframe-wrap">
+                    <div class="binance-iframe-bar">
+                        <div class="binance-iframe-info">
+                            <span class="binance-tag">BINANCE FUTURES</span>
+                            <span class="binance-sym" id="binance-frame-sym">BTCUSDT Perpetual</span>
+                        </div>
+                        <a id="binance-external-link" href="https://www.binance.com/en/futures/BTCUSDT" target="_blank" rel="noopener noreferrer" class="binance-ext-btn" title="Open official Binance Futures in a new tab">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                            <span>Open in Binance ↗</span>
+                        </a>
+                    </div>
+                    <iframe id="binance-iframe"
+                        data-src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_binance&symbol=BINANCE%3ABTCUSDT.P&interval=1&hidesidetoolbar=0&symboledit=0&saveimage=1&toolbarbg=181A20&theme=dark&style=1&timezone=Etc%2FUTC&studies=%5B%7B%22id%22%3A%22MASimple%40tv-basicstudies%22%2C%22inputs%22%3A%7B%22length%22%3A7%7D%7D%2C%7B%22id%22%3A%22MASimple%40tv-basicstudies%22%2C%22inputs%22%3A%7B%22length%22%3A25%7D%7D%2C%7B%22id%22%3A%22MASimple%40tv-basicstudies%22%2C%22inputs%22%3A%7B%22length%22%3A99%7D%7D%5D&hideideas=1"
+                        src=""
+                        allow="clipboard-read; clipboard-write; web-share; encrypted-media; fullscreen"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- COLUMN 3: Right Sidebar (100% TradeW Fast Execution Order Ticket - No Orderbook) -->
+        <aside class="sidebar-col" style="position: relative;">
+            <!-- Top Account Strip (TradeW Exact Match) -->
+            <div class="tradew-top-account-bar" id="tradew-top-account-bar" onclick="toggleSelectAccountModal(event)">
+                <div style="display: flex; align-items: center;">
+                    <span class="tradew-account-badge" id="disp-tradew-acct-badge">Demo</span>
+                    <span class="tradew-account-id" id="disp-tradew-acct-id">#161****1279 <span class="tradew-chevron" id="disp-tradew-chevron">&#9660;</span></span>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <span class="tradew-account-bal" id="disp-tradew-bal">27.57</span>
+                    <span class="tradew-account-pnl" id="disp-tradew-floating">+33.58</span>
+                    <span class="tradew-account-drop">&#9013;</span>
+                </div>
+            </div>
+
+            <!-- TradeW Select Account Modal Dropdown (Matches media_1789955158818.png) -->
+            <div class="tradew-select-acct-dropdown" id="tradew-select-acct-dropdown" onclick="event.stopPropagation()">
+                <div class="tradew-modal-title-row">
+                    <span>Select Account</span>
+                    <span class="tradew-info-circle" title="Switch between Live Binance Master Futures and Practice Demo account">&#9432;</span>
+                </div>
+                
+                <!-- Live Binance Master Account -->
+                <div class="tradew-acct-card" id="card-standard" onclick="selectAccountOption('standard')">
+                    <div class="tradew-acct-top">
+                        <span class="tradew-acct-type-name" style="color: #F0B90B; font-weight: 700;">Live Binance &#9889;</span>
+                        <span class="tradew-acct-id-tag" style="background: rgba(240,185,11,0.18); color: #F0B90B; border: 1px solid rgba(240,185,11,0.35);">Master Futures</span>
+                    </div>
+                    <div class="tradew-acct-card-bal" id="card-standard-bal" style="font-weight: 700;">$0.00 USDT</div>
+                    <div class="tradew-acct-check">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6L5 8.5L9.5 3.5" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+
+                <!-- Demo Account Card -->
+                <div class="tradew-acct-card selected" id="card-demo" onclick="selectAccountOption('demo')">
+                    <div class="tradew-acct-top">
+                        <span class="tradew-acct-type-name">Demo</span>
+                        <span class="tradew-acct-id-tag">#161****1279</span>
+                    </div>
+                    <div class="tradew-acct-card-bal" id="card-demo-bal">27.42</div>
+                    <div class="tradew-acct-check">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6L5 8.5L9.5 3.5" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+
+                <!-- Confirm Button -->
+                <button class="tradew-acct-confirm-btn" onclick="confirmAccountChoice()">Confirm</button>
+            </div>
+
+            <!-- Tabs: Market Order | Limit Order -->
+            <div class="tradew-panel-tabs">
+                <div class="tradew-tab-group">
+                    <button class="tradew-tab-item active" id="btn-tab-market" onclick="switchOrderType('market')">Market Order</button>
+                    <button class="tradew-tab-item" id="btn-tab-limit" onclick="switchOrderType('limit')">Limit Order</button>
+                </div>
+                <button class="tradew-tab-popup" title="Pop out order ticket">&#10697;</button>
+            </div>
+
+            <!-- Dual Quote Box: Sell Price | Spread | Buy Price -->
+            <div class="tradew-quote-card-wrap">
+                <div class="tradew-quote-box">
+                    <div class="tradew-quote-card quote-sell" id="quote-card-sell" onclick="selectOrderSide('SELL')">
+                        <span class="quote-card-lbl">Sell</span>
+                        <div class="quote-card-price" id="dual-quote-sell">
+                            <span class="quote-p-prefix" id="dual-quote-sell-prefix">0.088</span><span class="quote-p-suffix" id="dual-quote-sell-suffix">51</span>
+                        </div>
+                    </div>
+                    <div class="tradew-spread-pill" id="dual-quote-spread">21</div>
+                    <div class="tradew-quote-card quote-buy active" id="quote-card-buy" onclick="selectOrderSide('BUY')">
+                        <span class="quote-card-lbl">Buy</span>
+                        <div class="quote-card-price" id="dual-quote-buy">
+                            <span class="quote-p-prefix" id="dual-quote-buy-prefix">0.088</span><span class="quote-p-suffix" id="dual-quote-buy-suffix">72</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Slanted Sentiment Meter (TradeW Exact Match) -->
+                <div class="tradew-sentiment-container">
+                    <div class="sentiment-seg-sell" id="sentiment-sell-seg" style="width: 32.98%;">32.98%</div>
+                    <div class="sentiment-seg-buy" id="sentiment-buy-seg">67.02%</div>
+                </div>
+            </div>
+
+            <!-- Lot Size Stepper & 5 Quick Presets (TradeW Vertical Split +/-) -->
+            <div class="tradew-field-group">
+                <div class="tradew-stepper-box">
+                    <input type="text" class="stepper-main-val" id="inp-lot-val" value="0.01" readonly>
+                    <span class="stepper-lot-lbl">lot</span>
+                    <div class="stepper-vert-actions">
+                        <button class="btn-stepper-vert" onclick="stepLot(0.01)">+</button>
+                        <button class="btn-stepper-vert" onclick="stepLot(-0.01)">&minus;</button>
+                    </div>
+                </div>
+                <div class="tradew-lot-presets">
+                    <button class="lot-preset-btn active" onclick="setLotVal(0.01, this)">0.01</button>
+                    <button class="lot-preset-btn" onclick="setLotVal(0.10, this)">0.10</button>
+                    <button class="lot-preset-btn" onclick="setLotVal(0.50, this)">0.50</button>
+                    <button class="lot-preset-btn" onclick="setLotVal(1.00, this)">1.00</button>
+                    <button class="lot-preset-btn" onclick="setLotVal(5.00, this)">5.00</button>
+                </div>
+            </div>
+
+            <!-- Limit Price Row (TradeW Signature: Displayed when Limit Order tab is active) -->
+            <div class="tradew-limit-group" id="tradew-limit-section" style="display: none;">
+                <div class="toggle-header-row" style="margin-bottom: 2px;">
+                    <span class="toggle-title" style="cursor: default;">Limit Price</span>
+                </div>
+                <div class="tradew-stepper-box" style="height: 44px;">
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding-left: 12px; min-width: 0;">
+                        <input type="text" class="stepper-main-val" id="inp-limit-price" value="0.08860" oninput="onLimitPriceChange()" style="padding-left: 0; height: 20px; font-size: 14px;">
+                        <div id="limit-price-warning" style="color: #EF5350; font-size: 10px; font-weight: 600; line-height: 1.1; display: none;">Incorrect Price</div>
+                    </div>
+                    <span class="stepper-lot-lbl">Price</span>
+                    <div class="stepper-vert-actions">
+                        <button class="btn-stepper-vert" onclick="stepLimitPrice(1)">+</button>
+                        <button class="btn-stepper-vert" onclick="stepLimitPrice(-1)">&minus;</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Take Profit Toggle & Field -->
+            <div class="tradew-toggle-section">
+                <div class="toggle-header-row">
+                    <div class="toggle-title-wrap">
+                        <span class="toggle-title">Take Profit</span>
+                        <span class="toggle-cond-text" id="lbl-tp-cond">&#8804; 0.08801</span>
+                    </div>
+                    <label class="ios-switch">
+                        <input type="checkbox" id="chk-tp-enable" checked onchange="toggleTpSection(this.checked)">
+                        <span class="ios-slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-body" id="tp-body">
+                    <div class="tradew-stepper-box mini-stepper">
+                        <input type="text" class="stepper-main-val" id="inp-tp-price" value="0.08796" oninput="validateTpRange()">
+                        <div class="stepper-vert-actions">
+                            <button class="btn-stepper-vert" onclick="stepTpPrice(1)">+</button>
+                            <button class="btn-stepper-vert" onclick="stepTpPrice(-1)">&minus;</button>
+                        </div>
+                    </div>
+                    <div id="tp-range-warning" style="display:none;color:#EF5350;font-size:10px;font-weight:600;margin-top:2px;">Take Profit not within range</div>
+                    <div class="toggle-sub-info">
+                        <span id="disp-tp-pnl">Take Profit: +0.55</span>
+                        <span id="disp-tp-pts">Point:-55</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stop Loss Toggle & Field -->
+            <div class="tradew-toggle-section">
+                <div class="toggle-header-row">
+                    <div class="toggle-title-wrap">
+                        <span class="toggle-title">Stop Loss</span>
+                        <span class="toggle-cond-text" id="lbl-sl-cond">&le; 0.08758</span>
+                    </div>
+                    <label class="ios-switch">
+                        <input type="checkbox" id="chk-sl-enable" checked onchange="toggleSlSection(this.checked)">
+                        <span class="ios-slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-body" id="sl-body">
+                    <div class="tradew-stepper-box mini-stepper">
+                        <input type="text" class="stepper-main-val" id="inp-sl-price" value="0.08950" oninput="validateSlRange()">
+                        <div class="stepper-vert-actions">
+                            <button class="btn-stepper-vert" onclick="stepSlPrice(1)">+</button>
+                            <button class="btn-stepper-vert" onclick="stepSlPrice(-1)">&minus;</button>
+                        </div>
+                    </div>
+                    <div id="sl-range-warning" style="display:none;color:#EF5350;font-size:10px;font-weight:600;margin-top:2px;">Stop Loss not within range</div>
+                    <div class="toggle-sub-info">
+                        <span id="disp-sl-pnl">Stop Loss: -0.55</span>
+                        <span id="disp-sl-pts">Point:+55</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Primary Execution Button (Defaulting to Sell to match User's active state) -->
+            <button class="btn-tradew-main-action btn-buy" id="btn-primary-action" onclick="executeSelectedOrder()">
+                <span class="badge-action-demo">DEMO</span>
+                <span id="btn-action-text">Buy</span>
+            </button>
+
+            <!-- Order Summary Footer (Authentic TradeW Expand / Collapse) -->
+            <div class="tradew-order-footer">
+                <div class="summary-row">
+                    <span class="summary-lbl">Total</span>
+                    <span class="summary-val" id="disp-total-notional">1.92</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-lbl dashed">Margin</span>
+                    <span class="summary-val" id="disp-margin-req">1.77</span>
+                </div>
+                <div id="tradew-extra-summary" style="display: none; flex-direction: column; gap: 7px;">
+                    <div class="summary-row">
+                        <span class="summary-lbl">Leverage</span>
+                        <span class="summary-val" id="disp-leverage-val">1:50</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-lbl dashed">Fee</span>
+                        <span class="summary-val" id="disp-fee-val">0.15</span>
+                    </div>
+                </div>
+                <div class="summary-expand-row" onclick="toggleSidebarSummaryExpand()" title="Expand or collapse order metrics">
+                    <span class="expand-divider-line"></span>
+                    <span id="sidebar-expand-text" class="expand-label-btn">Expand &#8744;</span>
+                    <span class="expand-divider-line"></span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Floating Support Headset Widget -->
+        <div class="tradew-floating-support" title="Watch Support" onclick="alert('Watch 24/7 AI Risk Shield & Support Online')">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+            </svg>
+            <span class="tradew-support-badge">1</span>
+        </div>
+
+        <!-- ðŸ›ï¸ TradeW Full-Width Bottom Dock (Matches Image 2 & 3) -->
+        <section class="tradew-dock" id="tradew-dock">
+            <div class="dock-tab-nav">
+                <div class="dock-left-strip">
+                    <div class="dock-tabs">
+                        <button class="dock-tab-btn active" id="tab-btn-position" onclick="switchDockTab('position')">
+                            <span>Position</span>
+                        </button>
+                        <button class="dock-tab-btn" id="tab-btn-pending" onclick="switchDockTab('pending')">
+                            <span>Pending order</span>
+                        </button>
+                        <button class="dock-tab-btn" id="tab-btn-history" onclick="switchDockTab('history')">
+                            <span>History</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dock-actions-right" style="position: relative;">
+                    <!-- Trade W Custom Close with Dropdown Menu -->
+                    <div style="position: relative; display: inline-block;">
+                        <button class="btn-dock-sm" style="background: transparent; border: none; color: #848E9C; font-weight: 600; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px;" onclick="toggleCustomCloseMenu()">
+                            <span>Custom Close</span>
+                            <span style="font-size: 10px;">&#9013;</span>
+                        </button>
+                        <div id="dock-custom-close-menu" style="display: none; position: absolute; bottom: 32px; right: 0; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 1000; min-width: 160px; padding: 4px 0;">
+                            <div onclick="customClosePositions('PROFIT')" style="padding: 7px 12px; font-size: 11px; font-weight: 600; color: #00C076; cursor: pointer;" onmouseenter="this.style.background='rgba(0,192,118,0.1)'" onmouseleave="this.style.background='transparent'">Close Profitable Only</div>
+                            <div onclick="customClosePositions('LOSS')" style="padding: 7px 12px; font-size: 11px; font-weight: 600; color: #EF5350; cursor: pointer;" onmouseenter="this.style.background='rgba(239,83,80,0.1)'" onmouseleave="this.style.background='transparent'">Close Losing Only</div>
+                        </div>
+                    </div>
+
+                    <!-- Trade W 1-Click Batch Close Button -->
+                    <button class="btn-dock-sm" style="background: transparent; border: none; color: #848E9C; font-weight: 600; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px;" onclick="batchClosePositions()">
+                        <span>Batch Close</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dock Main Horizontal Body: Wide Table on Left + Image 2 Summary Widget on Right -->
+            <div class="dock-layout-body">
+                <div class="dock-view-body">
+                    <!-- Tab 1: POSITIONS TABLE (Matches Image 1 & 2) -->
+                    <div id="dock-view-position">
+                        <table class="dock-table">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Open Time</th>
+                                    <th>Sell / Buy</th>
+                                    <th>Lot</th>
+                                    <th>Opening Price</th>
+                                    <th>Current Price</th>
+                                    <th>Stop Loss</th>
+                                    <th>Take Profit</th>
+                                    <th>Fee</th>
+                                    <th>Swap</th>
+                                    <th>Order No</th>
+                                    <th>Profit and Loss</th>
+                                    <th style="text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dock-pos-tbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tab 2: PENDING ORDERS TABLE -->
+                    <div id="dock-view-pending" style="display: none;">
+                        <table class="dock-table">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Place Time</th>
+                                    <th>Type</th>
+                                    <th>Lot</th>
+                                    <th>Order Price</th>
+                                    <th>Current Price</th>
+                                    <th>Stop Loss</th>
+                                    <th>Take Profit</th>
+                                    <th>Fee</th>
+                                    <th>Order No</th>
+                                    <th>Status</th>
+                                    <th style="text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dock-pending-tbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tab 3: HISTORY TABLE -->
+                    <div id="dock-view-history" style="display: none;">
+                        <table class="dock-table">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Close Time</th>
+                                    <th>Sell / Buy</th>
+                                    <th>Lot</th>
+                                    <th>Opening Price</th>
+                                    <th>Close Price</th>
+                                    <th>Fee</th>
+                                    <th>Order No</th>
+                                    <th>Profit and Loss</th>
+                                    <th style="text-align: right;">Exit Settlement</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dock-hist-tbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tab 4: 6-BRAIN HUD -->
+                    <div id="dock-view-brain" style="display: none;">
+                        <div class="tab-grid-brain">
+                            <div class="brain-mini-card">
+                                <span class="brain-mini-title">&#129302; Brain 1: ML Meta-Gate</span>
+                                <span class="brain-mini-metric">P_AI: 91.4% &#9989; HIGH CONVICTION</span>
+                            </div>
+                            <div class="brain-mini-card">
+                                <span class="brain-mini-title">&#128302; Brain 2: 270b Future Sim</span>
+                                <span class="brain-mini-metric">MFE/MAE: 2.8x &#9989; ASYMMETRIC</span>
+                            </div>
+                            <div class="brain-mini-card">
+                                <span class="brain-mini-title">&#129504; Brain 3: Groq LPU Quant</span>
+                                <span class="brain-mini-metric">Latency: 38ms &#9989; ULTRA-LOW</span>
+                            </div>
+                            <div class="brain-mini-card">
+                                <span class="brain-mini-title">&#9883; Brain 4: Hawkes & OBI</span>
+                                <span class="brain-mini-metric">OBI: 68% | Hurst: 0.59 &#9989; TREND</span>
+                            </div>
+                            <div class="brain-mini-card">
+                                <span class="brain-mini-title">&#128483;ï¸ Brain 5: Neural Voice</span>
+                                <span class="brain-mini-metric">Chimes Armed &#128276; AUDIBLE</span>
+                            </div>
+                            <div class="brain-mini-card">
+                                <span class="brain-mini-title">&#128737;ï¸ Brain 6: PropGuard Shield</span>
+                                <span class="brain-mini-metric">Margin: $0.30 (50x ISOLATED) &#9989;</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 5: 80/20 SAFE VAULT -->
+                    <div id="dock-view-vault" style="display: none;">
+                        <div class="tab-grid-vault">
+                            <div class="vault-mini-card">
+                                <div class="vault-mini-lbl">Futures Wallet Balance</div>
+                                <div class="vault-mini-val val-green" id="vault-tab-wallet">$15.96</div>
+                            </div>
+                            <div class="vault-mini-card" style="border-color: var(--binance-gold); background: rgba(240,185,11,0.04);">
+                                <div class="vault-mini-lbl">&#128274; 80/20 Safe Vault (Swept)</div>
+                                <div class="vault-mini-val val-gold" id="vault-tab-vault">$0.24</div>
+                            </div>
+                            <div class="vault-mini-card">
+                                <div class="vault-mini-lbl">Total Net Equity</div>
+                                <div class="vault-mini-val val-cyan" id="vault-tab-equity">$16.20</div>
+                            </div>
+                            <div class="vault-mini-card">
+                                <div class="vault-mini-lbl">Session Realized PnL</div>
+                                <div class="vault-mini-val val-green" id="vault-tab-pnl">+$1.20</div>
+                            </div>
+                            <div class="vault-mini-card">
+                                <div class="vault-mini-lbl">Decided Win Rate</div>
+                                <div class="vault-mini-val val-green" id="vault-tab-winrate">100.0%</div>
+                            </div>
+                            <div class="vault-mini-card">
+                                <div class="vault-mini-lbl">Max Drawdown</div>
+                                <div class="vault-mini-val" id="vault-tab-dd">$0.00 (0%)</div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Right-side TP/SL action buttons -->
+    <div id="elb-bar">
+        <button id="elb-btn-tp" class="elb-btn elb-btn-tp" data-level="TP" draggable="true" title="Drag to set Take Profit">TP</button>
+        <button id="elb-btn-sl" class="elb-btn elb-btn-sl" data-level="SL" draggable="true" title="Drag to set Stop Loss">SL</button>
+    </div>
+    <!-- One immediate action per visible chart line. Entry closes the position;
+         SL/TP remove only that corresponding protective order. -->
+    <div id="line-close-controls" aria-label="Chart line actions">
+        <button id="line-close-entry" class="line-close-btn line-close-entry" title="Close position now">×</button>
+        <button id="line-close-sl" class="line-close-btn line-close-sl" title="Remove stop loss">×</button>
+        <button id="line-close-tp" class="line-close-btn line-close-tp" title="Remove take profit">×</button>
+    </div>
+
+    <!-- Trade W Stop Loss / Take Profit Floating Edit Modal -->
+    <div id="tradew-sltp-modal-overlay" class="sltp-modal-overlay" style="display: none;" onclick="closeSLTPModal(event)">
+        <div class="sltp-modal-card" onclick="event.stopPropagation();">
+            <div class="sltp-modal-header">
+                <div class="sltp-header-left">
+                    <span id="sltp-modal-title" class="sltp-modal-title">Stop Loss</span>
+                    <span id="sltp-modal-constraint" class="sltp-modal-constraint">&#8804;0.08465</span>
+                </div>
+                <button class="sltp-modal-close" onclick="closeSLTPModal()">&#10005;</button>
+            </div>
+            
+            <div class="sltp-stepper-box">
+                <input type="text" id="sltp-input-price" class="sltp-stepper-input" oninput="onSLTPInputChange()" />
+                <div class="stepper-vert-actions">
+                    <button class="btn-stepper-vert" onclick="stepSLTP(1)">+</button>
+                    <button class="btn-stepper-vert" onclick="stepSLTP(-1)">&minus;</button>
+                </div>
+            </div>
+
+            <div class="sltp-modal-metrics">
+                <div>
+                    <span id="sltp-metric-label">Stop Loss</span>: <span id="sltp-metric-pnl" class="val-red">-6.39</span>
+                </div>
+                <div>
+                    Point: <span id="sltp-metric-point">-71</span>
+                </div>
+            </div>
+
+            <button class="sltp-btn-save" onclick="submitSLTPModal()">Save</button>
+        </div>
+    </div>
+
+    <!-- Interactive Client Scripts -->
+    <script src="/static/js/terminal.js?v=20260923z"></script>
+</body>
+</html>

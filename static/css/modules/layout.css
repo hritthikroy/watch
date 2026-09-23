@@ -1,0 +1,40 @@
+        /* 3-Column Tradewill Master Layout with Full-Width Bottom Dock */
+        .master-layout {
+            height: calc(100vh - 48px);
+            display: grid;
+            grid-template-columns: 330px 1fr 330px;
+            grid-template-rows: 1fr 290px;
+            overflow: hidden;
+            background: var(--bg-dock);
+            gap: 0;
+            transition: grid-template-rows 0.25s cubic-bezier(0.2, 0, 0, 1);
+        }
+        .master-layout.dock-expanded {
+            grid-template-rows: 1fr 420px;
+        }
+        .master-layout.dock-compact {
+            grid-template-rows: 1fr 200px;
+        }
+
+        /* COLUMN 1: Watchlist Sidebar */
+        .watchlist-col {
+            grid-column: 1;
+            grid-row: 1;
+            background: var(--bg-dock);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .watchlist-header {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-card);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .watchlist-tabs-row {
+            display: flex;
+            gap: 6px;
+        }

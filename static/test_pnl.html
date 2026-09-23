@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>PNL Calculation Test - INCOGNITO MODE</title>
+    <style>
+        body { font-family: 'Roboto Mono', monospace; background: #0B0E11; color: #EAECEF; padding: 30px; }
+        .box { background: #1E2329; padding: 20px; margin: 15px 0; border-radius: 8px; border: 1px solid #2B3139; }
+        .green { color: #00C076; }
+        .red { color: #F6465D; }
+        input { background: #0B0E11; color: #EAECEF; border: 1px solid #2B3139; padding: 8px; font-size: 14px; border-radius: 4px; }
+        button { background: #FCD535; color: #0B0E11; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #F0B90B; }
+    </style>
+</head>
+<body>
+    <h1>🔍 PNL Calculation Debug Test</h1>
+    
+    <div class="box">
+        <h3>Test Parameters</h3>
+        <p>Entry Price: <input type="number" id="entry" value="81599.7" step="0.1"> BTCUSDT</p>
+        <p>Target Price: <input type="number" id="target" value="82337.7" step="0.1"></p>
+        <p>Lot Size: <input type="number" id="lot" value="0.01" step="0.01"></p>
+        <p>Side: <select id="side"><option value="BUY">BUY</option><option value="SELL">SELL</option></select></p>
+        <p><button onclick="calculate()">Calculate PNL</button></p>
+    </div>
+
+    <div class="box">
+        <h3>Results</h3>
+        <p id="result" style="font-size: 20px; font-weight: bold;">Click Calculate</p>
+        <p id="debug"></p>
+    </div>
+
+    <script>
+        const MT4_CONTRACT_SPECS = {
+            'BTCUSDT': { contractSize: 1.0, tick: 0.1, prec: 1 },
+            'ETHUSDT': { contractSize: 10.0, tick: 0.01, prec: 2 },
+            'XRPUSDT': { contractSize: 1000.0, tick: 0.0001, prec: 4 }
+        };
+
+        function calculate() {
+            const entry = parseFloat(document.getElementById('entry').value);
+            const target = parseFloat(document.getElementById('target').value);
+            const lot = parseFloat(document.getElementById('lot').value);
+            const side = document.getElementById('side').value;
+            
+            const symbol = 'BTCUSDT';
+            const spec = MT4_CONTRACT_SPECS[symbol];
+            const contractSize = spec.contractSize;
+            
+            const isLong = side === 'BUY';
+            const rawDiff = isLong ? (target - entry) : (entry - target);
+            
+            // CORRECT FORMULA
+            const pnl = rawDiff * lot * contractSize;
+            
+            const resultEl = document.getElementById('result');
+            resultEl.innerHTML = (pnl >= 0 ? '<span class=\'green\'>+' : '<span class=\'red\'>') + pnl.toFixed(2) + '</span> USDT';
+            
+            document.getElementById('debug').innerHTML = 
+                '<strong>Calculation:</strong><br>' +
+                'Price Diff: ' + target + ' - ' + entry + ' = ' + rawDiff.toFixed(2) + '<br>' +
+                'Formula: ' + rawDiff.toFixed(2) + ' × ' + lot + ' × ' + contractSize + ' = <strong>' + pnl.toFixed(2) + '</strong><br>' +
+                '<br>' +
+                '<strong>Expected for your screenshot:</strong><br>' +
+                'Entry: 81599.7, SL: 82337.7, Lot: 0.01<br>' +
+                'Diff: 738.0, PNL = 738.0 × 0.01 × 1.0 = <span class=\'green\'>+7.38 USDT</span><br>' +
+                '<br>' +
+                '<em>If you see +7380.00 in the main app, the lot is being multiplied by 1000</em>';
+        }
+        
+        // Auto-calculate on load
+        window.onload = function() {
+            calculate();
+        };
+    </script>
+</body>
+</html>

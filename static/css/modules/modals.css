@@ -1,0 +1,121 @@
+        /* &#9472;&#9472; Trade W Stop Loss / Take Profit Floating Edit Modal (Matches Image 1) &#9472;&#9472; */
+        .sltp-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(3px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        .sltp-modal-card {
+            width: 380px;
+            background: #20242B;
+            border-radius: 10px;
+            border: 1px solid #2B313A;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85);
+            padding: 18px 20px 22px;
+            color: #FFFFFF;
+            user-select: none;
+            box-sizing: border-box;
+        }
+        .sltp-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 10px;
+        }
+        .sltp-header-left {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+        .sltp-modal-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+        .sltp-modal-constraint {
+            font-size: 13px;
+            color: #848E9C;
+            font-weight: 500;
+            font-family: 'Roboto Mono', monospace;
+        }
+        .sltp-modal-close {
+            background: transparent;
+            border: none;
+            color: #848E9C;
+            font-size: 16px;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .sltp-modal-close:hover { color: #FFFFFF; }
+        .sltp-stepper-box {
+            background: #2C313C;
+            border: 1px solid #363C48;
+            border-radius: 6px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+        .sltp-stepper-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #FFFFFF;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 0 14px;
+            text-align: left;
+            cursor: ns-resize; /* Show vertical resize cursor to indicate draggable */
+            user-select: none; /* Prevent text selection during drag */
+        }
+        .sltp-stepper-input:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .sltp-modal-metrics {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 12px;
+            font-family: 'Roboto Mono', monospace;
+            color: #848E9C;
+        }
+        .sltp-btn-save {
+            width: 100%;
+            height: 44px;
+            margin-top: 22px;
+            border-radius: 22px;
+            background: #00C076;
+            border: none;
+            color: #FFFFFF;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 192, 118, 0.4);
+            transition: all 0.15s ease;
+        }
+        .sltp-btn-save:hover {
+            background: #00D984;
+            box-shadow: 0 6px 18px rgba(0, 192, 118, 0.55);
+        }
+
+        .watchlist-items {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .watchlist-items::-webkit-scrollbar { width: 4px; }
+        .watchlist-items::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+

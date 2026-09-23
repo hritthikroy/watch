@@ -1,0 +1,369 @@
+        /* Watchlist Column */
+        body.theme-light .watchlist-col {
+            background: var(--bg-dock);
+            border-right-color: var(--border-color);
+        }
+        body.theme-light .tradew-search-bar {
+            background: #FFFFFF;
+            border-bottom-color: var(--border-color);
+        }
+        body.theme-light .tradew-search-input-box {
+            background: var(--bg-card-alt);
+            border-color: var(--border-color);
+        }
+        body.theme-light .tradew-cat-carousel {
+            background: #FFFFFF;
+            border-bottom-color: var(--border-color);
+        }
+        body.theme-light .tradew-cat-pill {
+            color: var(--text-secondary);
+        }
+        body.theme-light .tradew-cat-pill:hover {
+            color: var(--text-primary);
+        }
+        body.theme-light .tradew-cat-pill.active {
+            color: var(--text-primary);
+            border-bottom: 2px solid #00C076;
+        }
+        body.theme-light .tradew-wl-header {
+            background: var(--bg-card-alt);
+            border-bottom-color: var(--border-subtle);
+            color: var(--text-secondary);
+        }
+        body.theme-light .tradew-wl-row {
+            border-bottom-color: var(--border-subtle);
+            background: transparent;
+        }
+        body.theme-light .tradew-wl-row:hover {
+            background: var(--hover-bg);
+        }
+        body.theme-light .tradew-wl-row.active {
+            background: rgba(0, 192, 118, 0.08);
+            border-left: 2px solid #00C076;
+        }
+        body.theme-light .tradew-wl-sym { color: var(--text-primary); }
+        body.theme-light .tradew-wl-price { color: var(--text-primary); }
+        body.theme-light .tradew-arrow-btn:hover { color: var(--text-primary); }
+
+        /* Stage Toolbar & Chart Stage */
+        body.theme-light .center-stage {
+            background: #FFFFFF;
+        }
+        body.theme-light .stage-toolbar {
+            background: #FFFFFF;
+            border-bottom-color: var(--border-color);
+        }
+        body.theme-light .stage-symbol-badge,
+        body.theme-light #chart-sym-title {
+            color: var(--text-primary);
+        }
+        body.theme-light .btn-nav {
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+        body.theme-light .btn-nav:hover {
+            background: var(--hover-bg);
+            color: var(--text-primary);
+        }
+        body.theme-light .nano-stream-badge {
+            background: rgba(0, 192, 118, 0.08);
+            border-color: rgba(0, 192, 118, 0.3);
+            color: #008A54;
+        }
+        body.theme-light .chart-stage-wrap {
+            background: #FFFFFF;
+        }
+        body.theme-light .chart-watermark {
+            opacity: 0.035;
+        }
+        body.theme-light .chart-watermark svg {
+            fill: #707A8A;
+        }
+        body.theme-light .chart-watermark span {
+            color: #707A8A;
+        }
+        body.theme-light .tradew-chart-brand-name {
+            color: #707A8A;
+        }
+
+        /* Right Sidebar Order Execution Ticket */
+        body.theme-light .sidebar-col {
+            background: #FFFFFF;
+            border-left-color: var(--border-color);
+        }
+        body.theme-light .tradew-panel-tabs {
+            border-bottom-color: var(--border-subtle);
+        }
+        body.theme-light .tradew-tab-item {
+            color: var(--text-secondary);
+        }
+        body.theme-light .tradew-tab-item.active {
+            color: var(--text-primary);
+        }
+        body.theme-light .tradew-tab-item.active::after {
+            background: #00C076;
+        }
+        body.theme-light .tradew-quote-box {
+            background: var(--bg-card-alt);
+            border-color: var(--border-color);
+        }
+        body.theme-light .quote-sell {
+            background: rgba(239, 83, 80, 0.06);
+            border: 1px solid rgba(239, 83, 80, 0.15);
+        }
+        body.theme-light .quote-sell.active {
+            background: #EF5350;
+            border: none;
+        }
+        body.theme-light .quote-buy {
+            background: rgba(0, 192, 118, 0.06);
+            border: 1px solid rgba(0, 192, 118, 0.15);
+        }
+        body.theme-light .quote-buy.active {
+            background: #00C076;
+            border: none;
+        }
+        body.theme-light .tradew-spread-pill {
+            background: #FFFFFF;
+            border-color: var(--border-color);
+            color: var(--text-primary);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+        body.theme-light .tradew-sentiment-container {
+            background: var(--bg-card-alt);
+            border-color: var(--border-color);
+        }
+        body.theme-light .tradew-stepper-box {
+            background: var(--bg-card-alt);
+            border-color: var(--border-color);
+        }
+        body.theme-light .stepper-main-val {
+            color: var(--text-primary);
+        }
+        body.theme-light .stepper-vert-actions {
+            border-left-color: var(--border-color);
+        }
+        body.theme-light .btn-stepper-vert {
+            color: var(--text-secondary);
+        }
+        body.theme-light .btn-stepper-vert:first-child {
+            border-bottom-color: var(--border-color);
+        }
+        body.theme-light .btn-stepper-vert:hover {
+            background: var(--hover-bg);
+            color: var(--text-primary);
+        }
+        body.theme-light .lot-preset-btn {
+            background: var(--bg-card-alt);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+        body.theme-light .lot-preset-btn:hover {
+            border-color: #00C076;
+            color: #00C076;
+        }
+        body.theme-light .lot-preset-btn.active {
+            background: rgba(0, 192, 118, 0.12);
+            border-color: #00C076;
+            color: #00C076;
+        }
+        body.theme-light .toggle-title {
+            color: var(--text-primary);
+        }
+        body.theme-light .summary-lbl {
+            color: var(--text-secondary);
+        }
+        body.theme-light .summary-val {
+            color: var(--text-primary);
+        }
+        body.theme-light .expand-divider-line {
+            background: var(--border-color);
+        }
+
+        /* Bottom Dock Section */
+        body.theme-light .tradew-dock {
+            background: var(--bg-dock);
+            border-top-color: var(--border-color);
+        }
+        body.theme-light .dock-tab-nav {
+            background: var(--bg-dock);
+            border-bottom-color: var(--border-color);
+        }
+        body.theme-light .dock-tab-btn {
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+        }
+        body.theme-light .dock-tab-btn:hover {
+            color: var(--text-primary);
+        }
+        body.theme-light .dock-tab-btn.active {
+            color: var(--text-primary);
+            border-bottom: 2px solid #00C076;
+            background: transparent;
+        }
+        body.theme-light .dock-layout-body,
+        body.theme-light .dock-view-body,
+        body.theme-light .dock-side-summary {
+            background: var(--bg-dock);
+            border-color: var(--border-color);
+        }
+        body.theme-light .dock-summary-lbl {
+            color: var(--text-secondary);
+        }
+        body.theme-light .dock-summary-val {
+            color: var(--text-primary);
+        }
+        body.theme-light .dock-table th {
+            background: var(--dock-header-bg);
+            border-bottom-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+        body.theme-light .dock-table td {
+            border-bottom-color: var(--border-subtle);
+        }
+        body.theme-light .dock-table tbody tr:hover {
+            background: var(--hover-bg);
+        }
+        body.theme-light .dock-table tbody tr.row-focus {
+            background: rgba(0, 192, 118, 0.08);
+        }
+        body.theme-light .btn-dock-close-circle {
+            background: var(--bg-card-alt);
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        /* Popups, Dropdowns & Modals in Light Mode */
+        body.theme-light #dock-custom-close-menu {
+            background: #FFFFFF;
+            border: 1px solid #E2E6ED;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        body.theme-light .tradew-select-acct-dropdown {
+            background: #FFFFFF;
+            border: 1px solid #E2E6ED;
+            box-shadow: 0 16px 44px rgba(0, 0, 0, 0.12);
+            color: var(--text-primary);
+        }
+        body.theme-light .tradew-modal-title-row {
+            color: var(--text-primary);
+        }
+        body.theme-light .tradew-acct-card {
+            background: #F4F6F9;
+            border: 1.5px solid #E2E6ED;
+        }
+        body.theme-light .tradew-acct-card.selected {
+            border-color: #00C076;
+            background: #FFFFFF;
+        }
+        body.theme-light .tradew-acct-type-name,
+        body.theme-light .tradew-acct-card-bal {
+            color: var(--text-primary);
+        }
+        body.theme-light .tradew-acct-id-tag {
+            border-color: #D0D5DD;
+            color: var(--text-secondary);
+        }
+        body.theme-light .tradew-acct-add-btn {
+            background: #F4F6F9;
+            border: 1px solid #E2E6ED;
+            color: var(--text-primary);
+        }
+        body.theme-light .tradew-acct-add-btn:hover {
+            background: #EAEFF5;
+        }
+
+        /* SLTP Floating Modal */
+        body.theme-light .sltp-modal-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E6ED;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+            color: var(--text-primary);
+        }
+        body.theme-light .sltp-modal-title {
+            color: var(--text-primary);
+        }
+        body.theme-light .sltp-modal-constraint {
+            color: var(--text-secondary);
+        }
+        body.theme-light .sltp-stepper-box {
+            background: #F4F6F9;
+            border: 1px solid #E2E6ED;
+        }
+        body.theme-light .sltp-stepper-input {
+            color: var(--text-primary);
+        }
+
+        /* Brain & Vault Mini Cards */
+        body.theme-light .brain-mini-card,
+        body.theme-light .vault-mini-card {
+            background: #FFFFFF;
+            border-color: var(--border-color);
+        }
+    
+        /* ── Right-side Entry Line TP/SL Buttons ───────────────────── */
+        #elb-bar {
+            position: fixed;
+            display: none;
+            flex-direction: row;
+            align-items: center;
+            gap: 4px;
+            transform: translateY(-50%);
+            pointer-events: auto;
+            user-select: none;
+            z-index: 10100;
+        }
+        .elb-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 20px;
+            padding: 0 7px;
+            border-radius: 3px;
+            border: 1px solid rgba(255,255,255,0.25);
+            background: #1E222D;
+            font-size: 11px;
+            font-weight: 800;
+            font-family: -apple-system, 'Segoe UI', sans-serif;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            transition: all 0.1s ease;
+        }
+        /* `display:flex` above would otherwise override the HTML hidden state. */
+        .elb-btn[hidden] { display: none !important; }
+        .elb-btn-tp { color: #00C076; border-color: rgba(0,192,118,0.6); }
+        .elb-btn-tp:hover { background: #00C076; color: #FFFFFF; }
+        .elb-btn-sl { color: #F6465D; border-color: rgba(246,70,93,0.6); }
+        .elb-btn-sl:hover { background: #F6465D; color: #FFFFFF; }
+        .elb-btn.is-dragging { opacity: 0.55; cursor: grabbing; }
+        #line-close-controls { position: fixed; z-index: 10001; pointer-events: none; }
+        .line-close-btn {
+            position: fixed;
+            display: none;
+            width: 18px;
+            height: 18px;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            /* Inline × only: no detached circle, shadow, or raised card. */
+            background: transparent;
+            color: #FFFFFF;
+            font: 400 15px/18px Arial, sans-serif;
+            cursor: grab;
+            touch-action: none;
+            pointer-events: auto;
+            box-shadow: none;
+            text-align: center;
+        }
+        .line-close-entry, .line-close-sl, .line-close-tp { color: #FFFFFF; }
+        .line-close-btn:hover { background: transparent; color: #FFFFFF; transform: scale(1.12); }
+        .line-close-btn:focus-visible { outline: 1px solid rgba(255,255,255,0.95); outline-offset: 1px; }
+        .line-close-btn.is-cancelling {
+            background: transparent;
+            color: #F0B90B;
+            transform: scale(1.16);
+            cursor: wait;
+        }
+        #tv-chart.sltp-line-dragging,
+        #tv-chart.sltp-line-dragging * { cursor: grabbing !important; }

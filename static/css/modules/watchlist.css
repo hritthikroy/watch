@@ -1,0 +1,166 @@
+        /* Trade W Left Watchlist Styles (Matches Image 2) */
+        .tradew-search-bar {
+            height: 40px;
+            padding: 6px 10px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .tradew-search-input-box {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0 8px;
+            height: 28px;
+        }
+        .tradew-search-icon {
+            width: 13px;
+            height: 13px;
+            margin-right: 7px;
+            color: #7B8494;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 13px;
+        }
+        .tradew-search-icon svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+        .position-edit-icon {
+            color: #626C7B !important;
+            font: 700 15px/1 Arial, sans-serif;
+            cursor: pointer;
+            vertical-align: -1px;
+            transition: color 0.15s ease;
+        }
+        .position-edit-icon:hover { color: #9AA5B5 !important; }
+        .tradingview-mode-btn {
+            font-size: 11px;
+            padding: 3px 9px;
+            margin-left: 10px;
+            font-weight: 700;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .tradingview-mark {
+            color: #7B8494;
+            font: 800 9px/1 Arial, sans-serif;
+            letter-spacing: -0.5px;
+        }
+        .tradew-search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 11px;
+        }
+        .tradew-cat-carousel {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 4px;
+            height: 32px;
+        }
+        .tradew-arrow-btn {
+            background: transparent;
+            border: none;
+            color: #848E9C;
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .tradew-arrow-btn:hover { color: var(--text-primary); }
+        .tradew-cat-pills {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            flex: 1;
+            padding: 0 4px;
+        }
+        .tradew-cat-pills::-webkit-scrollbar { display: none; }
+        .tradew-cat-pill {
+            background: transparent;
+            border: none;
+            color: #848E9C;
+            font-size: 11.5px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 6px 0;
+            white-space: nowrap;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s ease;
+        }
+        .tradew-cat-pill.active {
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--text-primary);
+        }
+        .tradew-wl-header {
+            display: grid;
+            grid-template-columns: 1fr 80px 75px;
+            padding: 6px 12px;
+            background: var(--bg-card-alt);
+            color: #848E9C;
+            font-size: 11px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .tradew-wl-row {
+            display: grid;
+            grid-template-columns: 1fr 80px 75px;
+            align-items: center;
+            padding: 5px 12px;
+            border-bottom: 1px solid var(--border-subtle);
+            cursor: pointer;
+            transition: background 0.12s ease;
+            font-size: 12px;
+            min-height: 36px;
+        }
+        .tradew-wl-row:hover { background: var(--hover-bg); }
+        .tradew-wl-row.active {
+            background: rgba(255,255,255,0.05);
+        }
+        .tradew-wl-sym {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-primary);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            min-width: 0;
+        }
+        .tradew-star {
+            color: #596273;
+            cursor: pointer;
+            font-size: 13px;
+            flex-shrink: 0;
+            transition: color 0.15s ease, text-shadow 0.15s ease;
+        }
+        .tradew-star:hover { color: #D5A23B; }
+        .tradew-star.starred {
+            color: #F5B841;
+            text-shadow: 0 0 7px rgba(245,184,65,0.38);
+        }
+        .tradew-wl-price {
+            text-align: right;
+            font-family: 'Roboto Mono', monospace;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        .tradew-wl-chg {
+            text-align: right;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 700;
+        }
+
