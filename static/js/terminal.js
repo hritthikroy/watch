@@ -1,9 +1,8 @@
 /**
  * Titan 6-Brain TradeW High-Speed Web Trading Terminal
- * Modular Master Bundle
+ * Modular Master Bundle - Generated from static/js/modules/
  */
 
-/* --- 01_shield.js --- */
 // ============================================================================
 // Module: 01_shield.js
 // ============================================================================
@@ -46,7 +45,6 @@ console.log = function(...args) {
 
 
 
-/* --- 02_state.js --- */
 // ============================================================================
 // Module: 02_state.js
 // ============================================================================
@@ -89,7 +87,6 @@ let currentSymbol = "BTCUSDT";
 
 
 
-/* --- 03_config.js --- */
 // ============================================================================
 // Module: 03_config.js
 // ============================================================================
@@ -412,7 +409,6 @@ function _showReconnectBanner(show) {
 
 
 
-/* --- 04_audio.js --- */
 // ============================================================================
 // Module: 04_audio.js
 // ============================================================================
@@ -479,7 +475,6 @@ function _showReconnectBanner(show) {
 
 
 
-/* --- 05_ticker_engine.js --- */
 // ============================================================================
 // Module: 05_ticker_engine.js
 // ============================================================================
@@ -538,7 +533,6 @@ function startRafTickerEngine() {
 
 
 
-/* --- 06_order_ticket.js --- */
 // ============================================================================
 // Module: 06_order_ticket.js
 // ============================================================================
@@ -1018,7 +1012,6 @@ function setLotPreset(val) {
 
 
 
-/* --- 07_theme_account.js --- */
 // ============================================================================
 // Module: 07_theme_account.js
 // ============================================================================
@@ -1075,7 +1068,6 @@ function toggleSelectAccountModal(event) {
             if (typeof _clearActiveChartLines === 'function') _clearActiveChartLines();
             if (typeof _elbSetPosition === 'function') _elbSetPosition(null);
             if (typeof _hideOrderLineTickets === 'function') _hideOrderLineTickets();
-            if (typeof _hideChartLineCloseControls === 'function') _hideChartLineCloseControls();
 
             // 3. Clear bottom dock positions table and counter immediately
             const posTbody = document.getElementById("dock-pos-tbody");
@@ -1200,7 +1192,6 @@ function toggleSelectAccountModal(event) {
 
 
 
-/* --- 08_chart_engine.js --- */
 // ============================================================================
 // Module: 08_chart_engine.js
 // ============================================================================
@@ -1778,7 +1769,6 @@ function executeSelectedOrder() {
 
 
 
-/* --- 09_websocket.js --- */
 // ============================================================================
 // Module: 09_websocket.js
 // ============================================================================
@@ -2347,7 +2337,6 @@ function initMultiPositionWebSocket() {
 
 
 
-/* --- 10_chart_candles.js --- */
 // ============================================================================
 // Module: 10_chart_candles.js
 // ============================================================================
@@ -2375,7 +2364,6 @@ function _clearActiveChartLines() {
             _mousedownPl = null;
             _mousedownY = null;
             _setChartNavigationLocked(false);
-            _hideDragLevelFront();
             _clearActiveChartLines();
             // Keep the previously rendered canvas until a verified new batch
             // is ready. This is an internal atomic reload, not a white/blank
@@ -2543,7 +2531,6 @@ function _clearActiveChartLines() {
 
 
 
-/* --- 11_order_lines.js --- */
 // ============================================================================
 // Module: 11_order_lines.js
 // ============================================================================
@@ -2677,35 +2664,45 @@ function updateOnChartOrderLines() {
                 });
             } catch (error) {}
 
-            // Synchronize activePriceLines cleanly (exact 1:1 match by posId + lineType, no ghost lines)
-            let canReconcile = (activePriceLines.length === newLines.length);
-            if (canReconcile) {
-                for (let i = 0; i < newLines.length; i++) {
-                    const existingMeta = activePriceLines[i]?._meta;
-                    const nextMeta = newLines[i]?._meta;
-                    if (existingMeta?.posId !== nextMeta?.posId || existingMeta?.lineType !== nextMeta?.lineType) {
-                        canReconcile = false;
-                        break;
-                    }
+            // Incremental Smart Reconciliation: Never wipe and recreate all lines!
+            // This guarantees 100% flicker-free rendering when adding, dragging, or modifying lines.
+            const remainingExisting = [];
+            const matchedNewIndices = new Set();
+
+            for (const pl of activePriceLines) {
+                const pMeta = pl._meta;
+                const matchIdx = newLines.findIndex((nl, idx) => 
+                    !matchedNewIndices.has(idx) &&
+                    String(nl._meta?.posId) === String(pMeta?.posId) &&
+                    nl._meta?.lineType === pMeta?.lineType
+                );
+
+                if (matchIdx !== -1) {
+                    matchedNewIndices.add(matchIdx);
+                    const nl = newLines[matchIdx];
+                    try {
+                        pl.applyOptions(nl);
+                        pl._meta = nl._meta;
+                    } catch(e) {}
+                    remainingExisting.push(pl);
+                } else {
+                    // Line no longer exists (e.g. SL or TP cleared or position closed)
+                    try { candleSeries.removePriceLine(pl); } catch(e) {}
                 }
             }
-            if (canReconcile) {
-                for (let i = 0; i < newLines.length; i++) {
+
+            // Create only truly new lines that didn't previously exist
+            for (let i = 0; i < newLines.length; i++) {
+                if (!matchedNewIndices.has(i)) {
                     try {
-                        activePriceLines[i].applyOptions(newLines[i]);
-                        activePriceLines[i]._meta = newLines[i]._meta;
-                    } catch(e) {}
-                }
-            } else {
-                _clearActiveChartLines();
-                for (const lineOpts of newLines) {
-                    try {
-                        const pl = candleSeries.createPriceLine(lineOpts);
-                        pl._meta = lineOpts._meta;
-                        activePriceLines.push(pl);
+                        const pl = candleSeries.createPriceLine(newLines[i]);
+                        pl._meta = newLines[i]._meta;
+                        remainingExisting.push(pl);
                     } catch(e) {}
                 }
             }
+
+            activePriceLines = remainingExisting;
         }
 
         // Aliases for seamless integration        // Aliases for seamless integration with existing hooks
@@ -2760,7 +2757,6 @@ function updateOnChartOrderLines() {
 
 
 
-/* --- 12_watchlist.js --- */
 // ============================================================================
 // Module: 12_watchlist.js
 // ============================================================================
@@ -3115,7 +3111,6 @@ function switchSymbol(sym, btn, isManual = true) {
 
 
 
-/* --- 13_dock_positions.js --- */
 // ============================================================================
 // Module: 13_dock_positions.js
 // ============================================================================
@@ -3541,7 +3536,6 @@ function getSymbolTickSpec(sym) {
                         if (typeof _clearActiveChartLines === 'function') _clearActiveChartLines();
                         if (typeof _elbSetPosition === 'function') _elbSetPosition(null);
                         if (typeof _hideOrderLineTickets === 'function') _hideOrderLineTickets();
-                        if (typeof _hideChartLineCloseControls === 'function') _hideChartLineCloseControls();
                     } else {
                         const newPosIds = positions.map(p => `${p.pos_id}:${p.sl_price}:${p.tp_price || (p.tranches?.queen?.tp_price)}:${p.is_risk_free}`).join("|");
                         const needsFullRebuild = newPosIds !== _lastRenderedPosIds;
@@ -3834,12 +3828,10 @@ function getSymbolTickSpec(sym) {
 
 
 
-/* --- 14_order_overlays.js --- */
 // ============================================================================
 // Module: 14_order_overlays.js
 // ============================================================================
 
-function _elbBar() { return document.getElementById('elb-bar'); }
 
         function _setChartNavigationLocked(locked) {
             if (_chartNavigationLocked === locked) return;
@@ -3867,11 +3859,14 @@ function _elbBar() { return document.getElementById('elb-bar'); }
                 try { candleSeries.removePriceLine(_pendingLevelPriceLine); } catch (error) {}
             }
             _pendingLevelPriceLine = null;
+            const dragCard = document.getElementById('order-line-drag-card');
+            if (dragCard) dragCard.style.display = 'none';
         }
 
         // A new SL/TP has no real PriceLine until it is saved. Render this
-        // lightweight preview immediately so the line and exact price travel
-        // with the pointer while the trader chooses a level.
+        // preview immediately so the line and exact price travel
+        // with the pointer while the trader chooses a level, along with a
+        // real-time floating card displaying the exact price and calculated PnL.
         function _showPendingLevelPreview(type, price, position) {
             if (!candleSeries || !Number.isFinite(Number(price))) return;
             const color = type === 'SL' ? '#F6465D' : '#00C076';
@@ -3883,65 +3878,61 @@ function _elbBar() { return document.getElementById('elb-bar'); }
                 axisLabelVisible: true,
                 axisLabelColor: color,
                 axisLabelTextColor: '#FFFFFF',
-                // Preview only the TP/SL line and its native price badge.
-                // Do not show a separate DROP ticket or leave a ticket gap.
                 title: '',
             };
             if (_pendingLevelPriceLine) {
-                try { _pendingLevelPriceLine.applyOptions(options); return; } catch (error) {
+                try { _pendingLevelPriceLine.applyOptions(options); } catch (error) {
                     _clearPendingLevelPreview();
                 }
+            } else {
+                try { _pendingLevelPriceLine = candleSeries.createPriceLine(options); } catch (error) {}
             }
-            try { _pendingLevelPriceLine = candleSeries.createPriceLine(options); } catch (error) {}
-        }
 
-        function _lineCloseButton(type) {
-            return document.getElementById(`line-close-${type.toLowerCase()}`);
-        }
-
-        function _bindChartLineCloseControls() {
-            for (const type of ['ENTRY', 'SL', 'TP']) {
-                const button = _lineCloseButton(type);
-                if (!button || button.dataset.bound === 'true') continue;
-                button.dataset.bound = 'true';
-                // Keep the fixed inline button out of the chart canvas event
-                // path. This makes it reliably clickable even over the scale.
-                button.addEventListener('pointerdown', event => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                });
-                button.addEventListener('click', event => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    window.closeChartLine?.(type);
-                });
+            const chartContainer = document.getElementById('tv-chart');
+            if (!chartContainer) return;
+            const rect = chartContainer.getBoundingClientRect();
+            const y = candleSeries.priceToCoordinate(Number(price));
+            if (!Number.isFinite(y) || y < 0 || y > chartContainer.clientHeight) {
+                const dragCard = document.getElementById('order-line-drag-card');
+                if (dragCard) dragCard.style.display = 'none';
+                return;
             }
-        }
 
-
-
-        function _runningPriceFront() {
-            let front = document.getElementById('running-price-front');
-            if (front) return front;
-            front = document.createElement('div');
-            front.id = 'running-price-front';
-            front.style.cssText = 'position:fixed;display:none;pointer-events:none;z-index:9999;';
-            front.innerHTML = '<div data-role="line" style="position:absolute;left:0;right:0;top:0;border-top:1px dotted #00C076;"></div><span data-role="tag" style="position:absolute;right:2px;top:-9px;display:flex;align-items:center;justify-content:center;height:18px;min-width:58px;padding:0 6px;box-sizing:border-box;background:#00C076;color:#fff;text-align:center;font:700 11px Arial,sans-serif;">--</span>';
-            document.body.appendChild(front);
-            return front;
-        }
-
-        function _syncRunningPriceFront(container, rect) {
-            const front = document.getElementById('running-price-front');
-            if (front) front.style.display = 'none';
-        }
-
-        function _hideChartLineCloseControls() {
-            for (const type of ['ENTRY', 'SL', 'TP']) {
-                const button = _lineCloseButton(type);
-                if (button) button.style.display = 'none';
+            let dragCard = document.getElementById('order-line-drag-card');
+            if (!dragCard) {
+                dragCard = document.createElement('div');
+                dragCard.id = 'order-line-drag-card';
+                dragCard.className = 'order-line-ticket is-dragging';
+                dragCard.style.cssText = 'position:fixed;display:none;z-index:10005;transform:translateY(-50%);height:22px;line-height:22px;white-space:nowrap;pointer-events:none;border-radius:3px;box-shadow:0 2px 8px rgba(0,0,0,0.8);align-items:center;user-select:none;';
+                const lbl = document.createElement('span');
+                lbl.className = 'order-line-ticket-label';
+                dragCard.appendChild(lbl);
+                document.body.appendChild(dragCard);
             }
+
+            const pos = position || cachedPortfolioState?.active_positions?.find(p => p.symbol === currentSymbol) || _elbPos;
+            const isLong = (String(pos?.side).toUpperCase() === 'BUY' || String(pos?.side).toUpperCase() === 'LONG');
+            const lot = Number(pos?.lot || pos?.volume_lots || 0.01);
+            const entryP = Number(pos?.entryP || pos?.entry_price || price);
+            const sym = pos?.symbol || currentSymbol;
+            const contractSize = getLotContractSize(sym);
+            const difference = isLong ? (Number(price) - entryP) : (entryP - Number(price));
+            const pnl = difference * lot * contractSize;
+            const sign = pnl >= 0 ? '+' : '';
+
+            const lbl = dragCard.querySelector('.order-line-ticket-label');
+            if (lbl) {
+                lbl.innerHTML = `${type} ${lot}&nbsp;&nbsp;Est: ${sign}${pnl.toFixed(2)}`;
+            }
+            dragCard.style.background = color;
+            const baseRight = Math.max(0, window.innerWidth - rect.right + 82);
+            dragCard.style.right = `${baseRight}px`;
+            dragCard.style.left = 'auto';
+            dragCard.style.top = `${rect.top + y}px`;
+            dragCard.style.display = 'inline-flex';
         }
+
+
 
         function _bindTicketDragButton(button, posId, level) {
             let startX = 0, startY = 0;
@@ -4026,7 +4017,7 @@ function _elbBar() { return document.getElementById('elb-bar'); }
                 };
 
                 onDocUp = async (e) => {
-                    try { button.releasePointerCapture(event.pointerId); } catch(err) {}
+                    try { if (e && e.pointerId) button.releasePointerCapture(e.pointerId); } catch(err) {}
                     window.removeEventListener('pointermove', onDocMove, true);
                     window.removeEventListener('pointerup', onDocUp, true);
                     window.removeEventListener('pointercancel', onDocUp, true);
@@ -4038,17 +4029,20 @@ function _elbBar() { return document.getElementById('elb-bar'); }
                     document.body.style.userSelect = '';
                     _setChartNavigationLocked(false);
                     button.classList.remove('is-dragging');
-                    _clearPendingLevelPreview();
 
                     if (dragInfo.moved && Number.isFinite(dragInfo.price) && dragInfo.price > 0) {
+                        _clearPendingLevelPreview();
                         await _saveMissingLevel(dragInfo.type, dragInfo.position, e.clientY);
                     } else if (!isButtonDragging) {
+                        _clearPendingLevelPreview();
                         // Clicked without drag -> open precision SL/TP modal!
                         const p = dragInfo.position;
                         const cur = level === 'TP'
                             ? (p.tpP && Number(p.tpP) > 0 ? parseFloat(p.tpP) : (p.entryP * (p.side === 'BUY' ? 1.01 : 0.99)))
                             : (p.slP && Number(p.slP) > 0 ? parseFloat(p.slP) : (p.entryP * (p.side === 'BUY' ? 0.99 : 1.01)));
                         openSLTPModal(posId, level, cur, p.entryP, p.side, p.symbol, p.lot);
+                    } else {
+                        _clearPendingLevelPreview();
                     }
                 };
 
@@ -4072,27 +4066,90 @@ function _elbBar() { return document.getElementById('elb-bar'); }
             label.className = 'order-line-ticket-label';
             ticket.appendChild(label);
 
-            // For SL and TP badges: clicking directly on the ticket initiates line drag!
+            // For SL and TP badges: direct pointer drag with capture (Zero buffer, zero lag, smooth 60fps)
             if (type === 'SL' || type === 'TP') {
-                ticket.addEventListener('mousedown', function(event) {
+                ticket.addEventListener('pointerdown', function(event) {
                     if (event.button !== 0 || !candleSeries) return;
                     if (event.target.closest('.order-line-ticket-close')) return;
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    const pl = activePriceLines.find(l => l._meta && l._meta.lineType === type && l._meta.posId === posId);
+                    const pl = activePriceLines.find(l => l._meta && l._meta.lineType === type && String(l._meta.posId) === String(posId));
                     if (!pl) return;
-
                     const c = document.getElementById('tv-chart');
                     if (!c) return;
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                    try { ticket.setPointerCapture(event.pointerId); } catch(e) {}
 
                     _mousedownPl = pl;
                     _mousedownY = event.clientY;
                     _cachedRect = c.getBoundingClientRect();
+                    _isDragging = true;
+                    _dragState = { pl: pl, meta: pl._meta, currentPrice: pl.options().price, posId: posId, type: type };
                     _setChartNavigationLocked(true);
                     ticket.classList.add('is-dragging');
                     ticket.style.cursor = 'grabbing';
                     c.style.cursor = 'grabbing';
+                    document.body.style.userSelect = 'none';
+
+                    let moveRaf = false;
+                    let pendingY = event.clientY;
+
+                    const processMove = () => {
+                        moveRaf = false;
+                        if (!_isDragging || !_dragState || !candleSeries) return;
+                        const ry = pendingY - _cachedRect.top;
+                        let price = null;
+                        try { price = candleSeries.coordinateToPrice(ry); } catch(err) {}
+                        if (!price || !Number.isFinite(price) || price <= 0) return;
+                        _dragState.currentPrice = price;
+
+                        try {
+                            pl.applyOptions({
+                                price: price,
+                                title: '',
+                                axisLabelVisible: true,
+                                axisLabelColor: type === 'SL' ? '#F6465D' : '#00C076',
+                                axisLabelTextColor: '#FFFFFF',
+                            });
+                        } catch(err) {}
+
+                        _syncOrderLineTickets(c, _cachedRect);
+                    };
+
+                    const onMove = (e) => {
+                        pendingY = e.clientY;
+                        if (!moveRaf) {
+                            moveRaf = true;
+                            requestAnimationFrame(processMove);
+                        }
+                    };
+
+                    const onUp = async (e) => {
+                        try { if (e && e.pointerId) ticket.releasePointerCapture(e.pointerId); } catch(err) {}
+                        window.removeEventListener('pointermove', onMove, true);
+                        window.removeEventListener('pointerup', onUp, true);
+                        window.removeEventListener('pointercancel', onUp, true);
+
+                        ticket.classList.remove('is-dragging');
+                        ticket.style.cursor = 'grab';
+                        c.style.cursor = '';
+                        document.body.style.userSelect = '';
+                        _setChartNavigationLocked(false);
+
+                        const finalPrice = _dragState?.currentPrice;
+                        const meta = _dragState?.meta;
+
+                        if (finalPrice && meta) {
+                            await _commitOrderLevelUpdate(meta, finalPrice);
+                        }
+                        _isDragging = false;
+                        _dragState = null;
+                        _mousedownPl = null;
+                    };
+
+                    window.addEventListener('pointermove', onMove, true);
+                    window.addEventListener('pointerup', onUp, true);
+                    window.addEventListener('pointercancel', onUp, true);
                 });
             }
 
@@ -4190,7 +4247,7 @@ function _elbBar() { return document.getElementById('elb-bar'); }
             const y = (yCoord !== undefined && yCoord !== null) ? yCoord : candleSeries.priceToCoordinate(Number(price));
             if (!Number.isFinite(y) || y < 0 || y > container.clientHeight) { ticket.style.display = 'none'; return; }
 
-            const isSell = (meta.side === 'SELL' || meta.side === 'SHORT');
+            const isSell = (String(meta.side).toUpperCase() === 'SELL' || String(meta.side).toUpperCase() === 'SHORT');
             const color = type === 'SL' ? '#F6465D' : (type === 'TP' ? '#00C076' : (isSell ? '#F6465D' : '#00C076'));
             const label = ticket.querySelector('.order-line-ticket-label');
 
@@ -4202,22 +4259,26 @@ function _elbBar() { return document.getElementById('elb-bar'); }
                 const pnl = position ? calculatePositionPnl(position, mark) : 0;
                 const pnlSign = pnl >= 0 ? '+' : '';
                 const sideStr = isSell ? 'SELL' : 'BUY';
-                label.textContent = `${sideStr} ${meta.lot}  ${pnlSign}${pnl.toFixed(2)}`;
+                const nextText = `${sideStr} ${meta.lot}  ${pnlSign}${pnl.toFixed(2)}`;
+                if (label.textContent !== nextText) label.textContent = nextText;
             } else {
-                const isLong = (meta.side === 'BUY' || meta.side === 'LONG');
+                const isLong = (String(meta.side).toUpperCase() === 'BUY' || String(meta.side).toUpperCase() === 'LONG');
                 const lot = Number(meta.lot) || 0.01;
                 const difference = isLong ? Number(price) - meta.entryPrice : meta.entryPrice - Number(price);
                 const pnl = difference * lot * getLotContractSize(meta.symbol);
                 const sign = pnl >= 0 ? '+' : '';
-                label.textContent = `${type} ${lot}  Est: ${sign}${pnl.toFixed(2)}`;
+                const nextHtml = `${type} ${lot}&nbsp;&nbsp;Est: ${sign}${pnl.toFixed(2)}`;
+                if (label.innerHTML !== nextHtml) label.innerHTML = nextHtml;
             }
 
-            ticket.style.background = color;
-            label.style.background = 'transparent';
-            ticket.style.right = `${rightPx || Math.max(0, window.innerWidth - rect.right + 82)}px`;
-            ticket.style.left = 'auto';
-            ticket.style.top = `${rect.top + y}px`;
-            ticket.style.display = 'inline-flex';
+            if (ticket.style.background !== color) ticket.style.background = color;
+            if (label.style.background !== 'transparent') label.style.background = 'transparent';
+            const targetRight = `${rightPx || Math.max(0, window.innerWidth - rect.right + 82)}px`;
+            if (ticket.style.right !== targetRight) ticket.style.right = targetRight;
+            if (ticket.style.left !== 'auto') ticket.style.left = 'auto';
+            const targetTop = `${rect.top + y}px`;
+            if (ticket.style.top !== targetTop) ticket.style.top = targetTop;
+            if (ticket.style.display !== 'inline-flex') ticket.style.display = 'inline-flex';
 
             if (type === 'ENTRY') {
                 _syncOuterActionTag(posId, rect, y, rightPx, ticket);
@@ -4255,7 +4316,7 @@ function _elbBar() { return document.getElementById('elb-bar'); }
                 const ticket = document.getElementById(`order-line-ticket-${item.posId}-${item.type.toLowerCase()}`);
                 const tag = item.type === 'ENTRY' ? document.getElementById(`order-line-outer-${item.posId}`) : null;
 
-                let w = (ticket && ticket.offsetWidth > 50) ? ticket.offsetWidth : 135;
+                let w = (ticket && ticket.offsetWidth > 60) ? ticket.offsetWidth : 145;
 
                 if (item.type === 'ENTRY') {
                     const hasTP = activePriceLines.some(l => l._meta && String(l._meta.posId) === String(item.posId) && l._meta.lineType === 'TP');
@@ -4283,7 +4344,7 @@ function _elbBar() { return document.getElementById('elb-bar'); }
                 for (let j = 0; j < i; j++) {
                     if (Math.abs(visibleItems[i].y - visibleItems[j].y) < 24) {
                         const prevWidth = _measureItemWidth(visibleItems[j]);
-                        const neededOffset = (rightOffsets.get(visibleItems[j]) || baseRight) + prevWidth + 12;
+                        const neededOffset = (rightOffsets.get(visibleItems[j]) || baseRight) + prevWidth + 14;
                         offset = Math.max(offset, neededOffset);
                     }
                 }
@@ -4302,12 +4363,12 @@ function _elbBar() { return document.getElementById('elb-bar'); }
 
             document.querySelectorAll('.order-line-ticket').forEach(el => {
                 if (!activeTicketIds.has(el.id)) {
-                    el.style.display = 'none';
+                    if (el.style.display !== 'none') el.style.display = 'none';
                 }
             });
             document.querySelectorAll('.order-line-outer-tag').forEach(el => {
                 if (!activeOuterTagIds.has(el.id)) {
-                    el.style.display = 'none';
+                    if (el.style.display !== 'none') el.style.display = 'none';
                 }
             });
         }
@@ -4327,86 +4388,23 @@ function _elbBar() { return document.getElementById('elb-bar'); }
             }
         }
 
-        function _syncChartLineCloseControls(container, rect) {
-            _hideChartLineCloseControls();
-            _syncOrderLineTickets(container, rect);
-        }
-
-        function _elbHasConfiguredLevel(price, entryPrice, symbol) {
-            return Number.isFinite(Number(price))
-                && Number(price) > 0
-                && isValidSLTP(Number(price), Number(entryPrice), symbol);
-        }
-
-        function _elbSyncActions() {
-            const bar = _elbBar();
-            const tpButton = document.getElementById('elb-btn-tp');
-            const slButton = document.getElementById('elb-btn-sl');
-            if (!bar || !tpButton || !slButton) return;
-
-            if (!_elbPos) {
-                bar.style.display = 'none';
-                _hideChartLineCloseControls();
-                return;
-            }
-
-            // Hide TP/SL buttons if already set — user adjusts via drag lines
-            const hasTP = _elbPos.tpP && Number(_elbPos.tpP) > 0;
-            const hasSL = _elbPos.slP && Number(_elbPos.slP) > 0;
-            tpButton.hidden = hasTP;
-            slButton.hidden = hasSL;
-            // If both are already set, hide the whole bar — nothing to add
-            _elbPos.needsProtectionAction = !(hasTP && hasSL);
-        }
-
         function _elbTick() {
-            const bar = _elbBar();
-            if (!bar) { _elbRafId = null; return; }
-
-            if (isTvIframeMode || !candleSeries) {
-                bar.style.display = 'none';
-                _hideChartLineCloseControls();
+            const container = document.getElementById('tv-chart');
+            if (isTvIframeMode || !candleSeries || !container) {
                 _hideOrderLineTickets();
-                const runningFront = document.getElementById('running-price-front');
-                if (runningFront) runningFront.style.display = 'none';
                 _elbRafId = requestAnimationFrame(_elbTick);
                 return;
             }
-
-            const container = document.getElementById('tv-chart');
-            if (!container) { _elbRafId = requestAnimationFrame(_elbTick); return; }
             const rect = container.getBoundingClientRect();
-            _syncRunningPriceFront(container, rect);
-
             // Keep all on-chart order line tickets synced (Entry, SL, TP) across all positions
             _syncOrderLineTickets(container, rect);
-
-            if (!_elbPos) {
-                bar.style.display = 'none';
-                _elbRafId = requestAnimationFrame(_elbTick);
-                return;
-            }
-
-            let entryY = null;
-            try { entryY = candleSeries.priceToCoordinate(_elbPos.entryP); } catch(e) {}
-            if (entryY === null || entryY === undefined || entryY < 0 || entryY > container.clientHeight) {
-                bar.style.display = 'none';
-                _elbRafId = requestAnimationFrame(_elbTick);
-                return;
-            }
-
-            // Legacy standalone #elb-bar is replaced by dynamic per-position .order-line-outer-tag
-            bar.style.display = 'none';
-
             _elbRafId = requestAnimationFrame(_elbTick);
         }
 
         window._elbSetPosition = function(posData) {
             if (!posData) {
                 _elbPos = null;
-                _elbSyncActions();
                 if (typeof _hideOrderLineTickets === 'function') _hideOrderLineTickets();
-                if (typeof _hideChartLineCloseControls === 'function') _hideChartLineCloseControls();
                 return;
             }
             _elbPos = {
@@ -4418,14 +4416,12 @@ function _elbBar() { return document.getElementById('elb-bar'); }
                 slP:    posData.sl_price,
                 tpP:    posData.tp_price || (posData.tranches && posData.tranches.queen && posData.tranches.queen.tp_price)
             };
-            _elbSyncActions();
         };
 
         window._startElbLoop = function() {
             if (!_elbRafId) _elbRafId = requestAnimationFrame(_elbTick);
         };
         window._initEntryLineBar = function() {
-            _bindChartLineCloseControls();
             window._startElbLoop();
         };
 
@@ -4444,18 +4440,114 @@ function _elbBar() { return document.getElementById('elb-bar'); }
         };
 
         function _validateDraggedLevel(type, side, price, livePrice) {
-            const isLong = side === 'BUY' || side === 'LONG';
+            const isLong = (String(side).toUpperCase() === 'BUY' || String(side).toUpperCase() === 'LONG');
             if (type === 'SL') return isLong ? price < livePrice : price > livePrice;
             return isLong ? price > livePrice : price < livePrice;
         }
 
         function _lineTitleAtDraggedPrice(meta, price) {
-            const isLong = meta.side === 'BUY' || meta.side === 'LONG';
+            const isLong = (String(meta.side).toUpperCase() === 'BUY' || String(meta.side).toUpperCase() === 'LONG');
             const lot = Number(meta.lot) || 0.01;
             const difference = isLong ? price - meta.entryPrice : meta.entryPrice - price;
             const pnl = difference * lot * getLotContractSize(meta.symbol);
             const sign = pnl >= 0 ? '+' : '';
-            return `${meta.lineType} ${lot}  Est: ${sign}${pnl.toFixed(2)}`;
+            return `${meta.lineType} ${lot}&nbsp;&nbsp;Est: ${sign}${pnl.toFixed(2)}`;
+        }
+
+        async function _commitOrderLevelUpdate(meta, finalPrice) {
+            if (!finalPrice || finalPrice <= 0 || !meta) return;
+
+            const isLong = (String(meta.side).toUpperCase() === 'BUY' || String(meta.side).toUpperCase() === 'LONG');
+            const livePrice = (lastKnownPrice && lastKnownPrice > 0) ? lastKnownPrice : meta.entryPrice;
+
+            if (meta.lineType === 'SL') {
+                if (isLong && finalPrice >= livePrice) {
+                    _dragToast('SL must be below current price for BUY', '#F6465D');
+                    fetchPortfolio();
+                    return;
+                }
+                if (!isLong && finalPrice <= livePrice) {
+                    _dragToast('SL must be above current price for SELL', '#F6465D');
+                    fetchPortfolio();
+                    return;
+                }
+            } else {
+                if (isLong && finalPrice <= livePrice) {
+                    _dragToast('TP must be above current price for BUY', '#F6465D');
+                    fetchPortfolio();
+                    return;
+                }
+                if (!isLong && finalPrice >= livePrice) {
+                    _dragToast('TP must be below current price for SELL', '#F6465D');
+                    fetchPortfolio();
+                    return;
+                }
+            }
+
+            const prec = _getPricePrec(meta.symbol);
+            const snapped = parseFloat(finalPrice.toFixed(prec));
+
+            // 1. OPTIMISTIC IN-MEMORY STATE UPDATE (Zero buffering, zero jitter, zero bouncing)
+            if (cachedPortfolioState && cachedPortfolioState.active_positions) {
+                const p = cachedPortfolioState.active_positions.find(pos => String(pos.pos_id) === String(meta.posId));
+                if (p) {
+                    if (meta.lineType === 'SL') p.sl_price = snapped;
+                    if (meta.lineType === 'TP') {
+                        p.tp_price = snapped;
+                        if (p.tranches && p.tranches.queen) p.tranches.queen.tp_price = snapped;
+                    }
+                }
+            }
+            if (_elbPos && String(_elbPos.posId) === String(meta.posId)) {
+                if (meta.lineType === 'SL') _elbPos.slP = snapped;
+                if (meta.lineType === 'TP') _elbPos.tpP = snapped;
+            }
+
+            // Immediately keep the chart line at the exact snapped price
+            const pl = activePriceLines.find(l => l._meta && l._meta.lineType === meta.lineType && String(l._meta.posId) === String(meta.posId));
+            if (pl) {
+                try {
+                    pl.applyOptions({ price: snapped });
+                    if (pl._meta) pl._meta.price = snapped;
+                } catch(e) {}
+            }
+
+            const c = document.getElementById('tv-chart');
+            if (c) {
+                _syncOrderLineTickets(c, c.getBoundingClientRect());
+            }
+
+            // 2. Instantly update the bottom Position table cells
+            const slCell = document.getElementById(`position-sl-${meta.posId}`);
+            if (slCell && meta.lineType === 'SL') {
+                slCell.innerHTML = `${snapped.toFixed(prec)} <span class="position-edit-icon" onclick="openSLTPModal('${meta.posId}', 'SL', ${snapped}, ${meta.entryPrice}, '${meta.side}', '${meta.symbol}', ${meta.lot}); event.stopPropagation();" title="Edit Stop Loss">&#9998;</span>`;
+            }
+            const tpCell = document.getElementById(`position-tp-${meta.posId}`);
+            if (tpCell && meta.lineType === 'TP') {
+                tpCell.innerHTML = `${snapped.toFixed(prec)} <span class="position-edit-icon" onclick="openSLTPModal('${meta.posId}', 'TP', ${snapped}, ${meta.entryPrice}, '${meta.side}', '${meta.symbol}', ${meta.lot}); event.stopPropagation();" title="Edit Take Profit">&#9998;</span>`;
+            }
+
+            // 3. BACKGROUND SERVER SYNC (Seamless network commit)
+            try {
+                const resp = await fetch('/api/order/edit_sltp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pos_id: meta.posId, type: meta.lineType, price: snapped })
+                });
+                const data = await resp.json();
+                if (data.status === 'SUCCESS' || data.status === 'ok') {
+                    _dragToast(`${meta.lineType} set to ${snapped.toFixed(prec)}`, '#00C076');
+                } else if (data.status === 'NOT_FOUND') {
+                    _dragToast(data.message || 'Position no longer active', '#F6465D');
+                    fetchPortfolio();
+                    return;
+                } else {
+                    _dragToast(data.message || 'Error saving level', '#F6465D');
+                }
+            } catch(err) {
+                _dragToast('Network error saving level', '#F6465D');
+            }
+            fetchPortfolio();
         }
 
         async function _saveMissingLevel(type, position, clientY) {
@@ -4472,6 +4564,36 @@ function _elbBar() { return document.getElementById('elb-bar'); }
             }
             const precision = _getPricePrec(position.symbol);
             const snapped = Number(price.toFixed(precision));
+
+            // Optimistic update in local state to prevent buffering/flickering
+            if (cachedPortfolioState && cachedPortfolioState.active_positions) {
+                const p = cachedPortfolioState.active_positions.find(pos => String(pos.pos_id) === String(position.posId));
+                if (p) {
+                    if (type === 'SL') p.sl_price = snapped;
+                    if (type === 'TP') {
+                        p.tp_price = snapped;
+                        if (p.tranches && p.tranches.queen) p.tranches.queen.tp_price = snapped;
+                    }
+                }
+            }
+            if (_elbPos && String(_elbPos.posId) === String(position.posId)) {
+                if (type === 'SL') _elbPos.slP = snapped;
+                if (type === 'TP') _elbPos.tpP = snapped;
+            }
+            if (typeof updateOnChartOrderLines === 'function') {
+                updateOnChartOrderLines();
+            }
+
+            // Instantly update the bottom Position table cell
+            const slCell = document.getElementById(`position-sl-${position.posId}`);
+            if (slCell && type === 'SL') {
+                slCell.innerHTML = `${snapped.toFixed(precision)} <span class="position-edit-icon" onclick="openSLTPModal('${position.posId}', 'SL', ${snapped}, ${position.entryP}, '${position.side}', '${position.symbol}', ${position.lot}); event.stopPropagation();" title="Edit Stop Loss">&#9998;</span>`;
+            }
+            const tpCell = document.getElementById(`position-tp-${position.posId}`);
+            if (tpCell && type === 'TP') {
+                tpCell.innerHTML = `${snapped.toFixed(precision)} <span class="position-edit-icon" onclick="openSLTPModal('${position.posId}', 'TP', ${snapped}, ${position.entryP}, '${position.side}', '${position.symbol}', ${position.lot}); event.stopPropagation();" title="Edit Take Profit">&#9998;</span>`;
+            }
+
             try {
                 const response = await fetch('/api/order/edit_sltp', {
                     method: 'POST',
@@ -4493,128 +4615,9 @@ function _elbBar() { return document.getElementById('elb-bar'); }
                 _dragToast(`Could not set ${type}: ${error.message}`, '#F6465D');
             }
         }
-
-        function initMissingLevelDrag() {
-            const bar = _elbBar();
-            if (!bar || bar.dataset.dragBound === 'true') return;
-            bar.dataset.dragBound = 'true';
-
-            bar.addEventListener('pointerdown', (event) => {
-                const button = event.target.closest('[data-level]');
-                if (!button || event.button !== 0 || !_elbPos || !candleSeries) return;
-                const chartContainer = document.getElementById('tv-chart');
-                if (!chartContainer) return;
-                event.preventDefault();
-                event.stopPropagation();
-                button.setPointerCapture?.(event.pointerId);
-                _pendingLevelDrag = {
-                    type: button.dataset.level,
-                    startY: event.clientY,
-                    position: { ..._elbPos },
-                    moved: false,
-                };
-                _isPlacingMissingLevel = true;
-                document.body.style.userSelect = 'none';
-                button.classList.add('is-dragging');
-            });
-
-            bar.addEventListener('click', (event) => {
-                // These are drag handles, never modal-opening buttons.
-                event.preventDefault();
-                event.stopPropagation();
-            });
-
-            // Native drag/drop is the primary path; it works in browsers that
-            // do not deliver pointer moves outside a fixed overlay.
-            bar.addEventListener('dragstart', (event) => {
-                const button = event.target.closest('[data-level]');
-                if (!button || !_elbPos) return;
-                event.dataTransfer.effectAllowed = 'copy';
-                event.dataTransfer.setData('application/x-tradew-level', button.dataset.level);
-                event.dataTransfer.setData('text/plain', button.dataset.level);
-                button.classList.add('is-dragging');
-            });
-            bar.addEventListener('dragend', () => {
-                bar.querySelectorAll('[data-level]').forEach(button => button.classList.remove('is-dragging'));
-                _clearPendingLevelPreview();
-            });
-            const chartContainer = document.getElementById('tv-chart');
-            if (chartContainer) {
-                chartContainer.addEventListener('dragover', (event) => {
-                    if (event.dataTransfer.types.includes('application/x-tradew-level')) {
-                        event.preventDefault();
-                        event.dataTransfer.dropEffect = 'copy';
-                        const type = event.dataTransfer.getData('application/x-tradew-level');
-                        const relativeY = event.clientY - chartContainer.getBoundingClientRect().top;
-                        let price = null;
-                        try { price = candleSeries.coordinateToPrice(relativeY); } catch (error) {}
-                        if (type && _elbPos && Number.isFinite(Number(price))) {
-                            _showPendingLevelPreview(type, price, _elbPos);
-                        }
-                    }
-                });
-                chartContainer.addEventListener('drop', async (event) => {
-                    const type = event.dataTransfer.getData('application/x-tradew-level');
-                    if (!type || !_elbPos) return;
-                    event.preventDefault();
-                    _clearPendingLevelPreview();
-                    await _saveMissingLevel(type, { ..._elbPos }, event.clientY);
-                });
-            }
-
-            let _missingLevelRafPending = false;
-            let _pendingPointerEvent = null;
-
-            function _processMissingLevelMove() {
-                _missingLevelRafPending = false;
-                if (!_pendingLevelDrag || !candleSeries || !_pendingPointerEvent) return;
-                const chartContainer = document.getElementById('tv-chart');
-                if (!chartContainer) return;
-                if (Math.abs(_pendingPointerEvent.clientY - _pendingLevelDrag.startY) >= 3) {
-                    _pendingLevelDrag.moved = true;
-                }
-                const relativeY = _pendingPointerEvent.clientY - chartContainer.getBoundingClientRect().top;
-                let price = null;
-                try { price = candleSeries.coordinateToPrice(relativeY); } catch (e) {}
-                if (!Number.isFinite(price) || price <= 0) return;
-                _pendingLevelDrag.price = price;
-                _showPendingLevelPreview(_pendingLevelDrag.type, price, _pendingLevelDrag.position);
-            }
-
-            document.addEventListener('pointermove', (event) => {
-                if (!_pendingLevelDrag || !candleSeries) return;
-                _pendingPointerEvent = event;
-                if (!_missingLevelRafPending) {
-                    _missingLevelRafPending = true;
-                    requestAnimationFrame(_processMissingLevelMove);
-                }
-            });
-
-            document.addEventListener('pointerup', async (event) => {
-                const drag = _pendingLevelDrag;
-                if (!drag) return;
-                _pendingLevelDrag = null;
-                _pendingPointerEvent = null;
-                _isPlacingMissingLevel = false;
-                document.body.style.userSelect = '';
-                _clearPendingLevelPreview();
-                bar.querySelectorAll('[data-level]').forEach(button => button.classList.remove('is-dragging'));
-                if (!drag.moved || !Number.isFinite(drag.price) || drag.price <= 0) return;
-
-                await _saveMissingLevel(drag.type, drag.position, event.clientY);
-            });
-        }
-
         window.closeChartLine = async function(type, targetPosId) {
             const posId = targetPosId || _elbPos?.posId;
             if (!posId) return;
-            const button = _lineCloseButton(type);
-            if (button?.dataset.cancelling === 'true') return;
-            if (button) {
-                button.dataset.cancelling = 'true';
-                button.classList.add('is-cancelling');
-                button.setAttribute('aria-busy', 'true');
-            }
             try {
                 // Entry × closes the position; TP/SL × removes only that
                 // protective level. Both paths are immediate cancel actions.
@@ -4638,12 +4641,6 @@ function _elbBar() { return document.getElementById('elb-bar'); }
                 fetchPortfolio();
             } catch (error) {
                 alert(`Chart ${type} action failed: ${error.message}`);
-            } finally {
-                if (button) {
-                    button.dataset.cancelling = 'false';
-                    button.classList.remove('is-cancelling');
-                    button.removeAttribute('aria-busy');
-                }
             }
         };
 
@@ -4665,44 +4662,6 @@ function _elbBar() { return document.getElementById('elb-bar'); }
             t.style.opacity = '1';
             clearTimeout(t._tid);
             t._tid = setTimeout(() => { t.style.opacity = '0'; }, 2200);
-        }
-
-        function _dragLevelFront() {
-            let front = document.getElementById('drag-level-front');
-            if (front) return front;
-            front = document.createElement('div');
-            front.id = 'drag-level-front';
-            front.style.cssText = 'position:fixed;display:none;pointer-events:none;z-index:10000;';
-            front.innerHTML = '<div data-role="line" style="position:absolute;left:0;right:78px;top:0;border-top:1px dashed #F6465D;"></div><span data-role="title" style="position:absolute;right:60px;top:-9px;display:flex;align-items:center;height:18px;padding:0 6px;box-sizing:border-box;background:#F6465D;color:#fff;font:700 11px Arial,sans-serif;white-space:nowrap;"></span><span data-role="price" style="position:absolute;right:2px;top:-9px;display:flex;align-items:center;justify-content:center;height:18px;min-width:58px;padding:0 6px;box-sizing:border-box;background:#F6465D;color:#fff;font:700 11px Arial,sans-serif;"></span>';
-            document.body.appendChild(front);
-            return front;
-        }
-
-        function _hideDragLevelFront() {
-            const front = document.getElementById('drag-level-front');
-            if (front) front.style.display = 'none';
-        }
-
-        function _syncDragLevelFront(meta, price, container) {
-            const front = _dragLevelFront();
-            let y = null;
-            try { y = candleSeries.priceToCoordinate(price); } catch (error) {}
-            if (!Number.isFinite(y)) return;
-            const rect = container.getBoundingClientRect();
-            const color = meta.lineType === 'SL' ? '#F6465D' : '#00C076';
-            const line = front.querySelector('[data-role="line"]');
-            const title = front.querySelector('[data-role="title"]');
-            const priceTag = front.querySelector('[data-role="price"]');
-            front.style.left = `${rect.left}px`;
-            front.style.top = `${rect.top + y}px`;
-            front.style.width = `${rect.width}px`;
-            if (line) line.style.borderTopColor = color;
-            // The native TP/SL ticket remains the only ticket during drag so
-            // it never changes width, color, or layout. This overlay raises
-            // only the dashed line above the crosshair.
-            if (title) title.style.display = 'none';
-            if (priceTag) priceTag.style.display = 'none';
-            front.style.display = 'block';
         }
 
         window.initSLTPDrag = function() {
@@ -4837,46 +4796,15 @@ function _elbBar() { return document.getElementById('elb-bar'); }
 
                     const meta  = _dragState.meta;
                     const final = _dragState.currentPrice;
+                    _hideDragLevelFront();
+
+                    if (final && meta) {
+                        await _commitOrderLevelUpdate(meta, final);
+                    }
                     _isDragging  = false;
                     _dragState   = null;
                     _mousedownPl = null;
                     _mousedownY  = null;
-                    _hideDragLevelFront();
-
-                    if (!final || final <= 0) { fetchPortfolio(); return; }
-
-                    const isLong    = meta.side === 'BUY' || meta.side === 'LONG';
-                    const livePrice = (lastKnownPrice && lastKnownPrice > 0) ? lastKnownPrice : meta.entryPrice;
-
-                    if (meta.lineType === 'SL') {
-                        if (isLong  && final >= livePrice) { _dragToast('SL must be below current price for BUY', '#F6465D'); fetchPortfolio(); return; }
-                        if (!isLong && final <= livePrice) { _dragToast('SL must be above current price for SELL', '#F6465D'); fetchPortfolio(); return; }
-                    } else {
-                        if (isLong  && final <= livePrice) { _dragToast('TP must be above current price for BUY', '#F6465D'); fetchPortfolio(); return; }
-                        if (!isLong && final >= livePrice) { _dragToast('TP must be below current price for SELL', '#F6465D'); fetchPortfolio(); return; }
-                    }
-
-                    const prec    = _getPricePrec(meta.symbol);
-                    const snapped = parseFloat(final.toFixed(prec));
-
-                    try {
-                        const resp = await fetch('/api/order/edit_sltp', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ pos_id: meta.posId, type: meta.lineType, price: snapped })
-                        });
-                        const data = await resp.json();
-                        if (data.status === 'SUCCESS' || data.status === 'ok') {
-                            _dragToast(meta.lineType + ' updated to ' + snapped.toFixed(prec), '#00C076');
-                        } else if (data.status === 'NOT_FOUND') {
-                            _dragToast(data.message || 'Position no longer active', '#F6465D');
-                        } else {
-                            _dragToast(data.message || 'Error saving', '#F6465D');
-                        }
-                    } catch(err) {
-                        _dragToast('Network error', '#F6465D');
-                    }
-                    fetchPortfolio();
                 }, true);
 
             }, 300);

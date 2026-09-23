@@ -459,19 +459,43 @@
                     const body = JSON.parse(init.body || "{}");
                     const st = loadPortfolio(isLive);
                     const sym = (body.symbol || "BTCUSDT").toUpperCase();
-                    const entryP = parseFloat(body.entry_price || liveTickerMap[sym]?.lastPrice || FALLBACK_PRICES[sym] || 100);
-                    const vol = parseFloat(body.volume || 0.01);
-                    const side = (body.side || "BUY").toUpperCase();
+                    const isLimit = Boolean(body.is_limit || body.order_type === "LIMIT");
+                    const entryP = parseFloat(body.client_price || body.current_price || body.entry_price || (isLimit ? body.limit_price : null) || liveTickerMap[sym]?.lastPrice || FALLBACK_PRICES[sym] || 100);
+                    const vol = parseFloat(body.volume_lots || body.lot || body.volume || 0.01);
+                    const side = (body.side || body.cmd || "BUY").toUpperCase();
                     const cSize = getContractSize(sym);
                     const notional = entryP * vol * cSize;
                     const margin = notional / 50.0;
                     const fee = notional * 0.0005;
 
+                    if (isLimit) {
+                        const orderNo = String(Math.floor(100000 + Math.random() * 900000));
+                        const pendingOrd = {
+                            order_no: orderNo,
+                            symbol: sym,
+                            type: `${side} LIMIT`,
+                            place_time: new Date().toLocaleTimeString(),
+                            volume_lots: vol,
+                            order_price: entryP,
+                            current_price: liveTickerMap[sym]?.lastPrice || entryP,
+                            sl_price: body.sl_price ? parseFloat(body.sl_price) : null,
+                            tp_price: body.tp_price ? parseFloat(body.tp_price) : null,
+                            status: "PENDING"
+                        };
+                        st.pending_orders = st.pending_orders || [];
+                        st.pending_orders.unshift(pendingOrd);
+                        savePortfolio(st, isLive);
+                        return new Response(JSON.stringify({ status: "SUCCESS", order_no: orderNo, message: `Limit order #${orderNo} placed` }), {
+                            status: 200,
+                            headers: { "Content-Type": "application/json" }
+                        });
+                    }
+
                     const newPos = {
                         pos_id: (isLive ? "REAL-" : "POS-") + Math.floor(100000 + Math.random() * 900000),
                         symbol: sym,
                         side: side,
-                        order_type: body.order_type || "MARKET",
+                        order_type: "MARKET",
                         volume_lots: vol,
                         entry_price: entryP,
                         current_price: entryP,
@@ -494,129 +518,28 @@
                         status: 200,
                         headers: { "Content-Type": "application/json" }
                     });
+                }
+
                 // 6. /api/order/close & /api/live/close
                 if (url.includes("/close")) {
                     const body = JSON.parse(init?.body || "{}");
                     const posId = body.pos_id;
-                    const isLive = url.includes("/live/") || (posId && String(posId).startsWith("REAL-"));
-                    const st = loadPortfolio(isLive);
-                    const active = st.active_positions || [];
-                    const remaining = [];
-                    let closedPos = null;
+                    for (const isLive of [true, false]) {
+                        const st = loadPortfolio(isLive);
+                        const active = st.active_positions || [];
+                        const remaining = [];
+                        let closedPos = null;
 
-                    for (const p of active) {
-                        if (p.pos_id === posId) {
-                            closedPos = p;
-                        } else {
-                            remaining.push(p);
-                        }
-                    }
-
-                    if (closedPos) {
-                        const pnl = closedPos.unrealized_pnl || 0.0;
-                        let vaultSweep = 0;
-                        if (pnl > 0) {
-                            vaultSweep = Math.round(pnl * 0.20 * 100) / 100;
-                            st.safe_vault = Math.round((st.safe_vault + vaultSweep) * 100) / 100;
-                            st.wallet_balance = Math.round((st.wallet_balance + pnl - vaultSweep) * 100) / 100;
-                        } else {
-                            st.wallet_balance = Math.round((st.wallet_balance + pnl) * 100) / 100;
-                        }
-                        st.session_pnl = Math.round((st.session_pnl + pnl) * 100) / 100;
-                        st.total_equity = Math.round((st.wallet_balance + st.safe_vault) * 100) / 100;
-                        st.stats.total_trades++;
-                        if (pnl > 0) st.stats.wins++;
-                        else if (pnl < 0) st.stats.losses++;
-                        else st.stats.breakevens++;
-                        const decided = st.stats.wins + st.stats.losses;
-                        st.stats.decided_win_rate_pct = decided > 0 ? Math.round((st.stats.wins / decided * 1000) / 10) : 100.0;
-
-                        st.closed_trades.unshift({
-                            pos_id: closedPos.pos_id,
-                            symbol: closedPos.symbol,
-                            side: closedPos.side,
-                            volume_lots: closedPos.volume_lots,
-                            entry_time: closedPos.entry_time,
-                            closed_time: new Date().toLocaleTimeString(),
-                            entry_price: closedPos.entry_price,
-                            close_price: closedPos.current_price,
-                            sl_price: closedPos.sl_price,
-                            tp_price: closedPos.tp_price,
-                            total_fee: closedPos.fee,
-                            swap: 0.0,
-                            final_net_pnl: pnl,
-                            exit_reason: "Manual Close"
-                        });
-                        st.active_positions = remaining;
-                        savePortfolio(st, isLive);
-                        return new Response(JSON.stringify({ status: "SUCCESS", message: "Position closed" }), {
-                            status: 200,
-                            headers: { "Content-Type": "application/json" }
-                        });
-                    }
-                    return new Response(JSON.stringify({ status: "ERROR", message: "Position not found" }), {
-                        status: 404,
-                        headers: { "Content-Type": "application/json" }
-                    });
-                }
-
-                // 7. /api/order/edit_sltp
-                if (url.includes("/api/order/edit_sltp")) {
-                    const body = JSON.parse(init?.body || "{}");
-                    const st = loadPortfolio();
-                    for (const p of st.active_positions) {
-                        if (p.pos_id === body.pos_id) {
-                            if (body.type === "SL") {
-                                p.sl_price = body.clear ? null : parseFloat(body.price);
+                        for (const p of active) {
+                            if (p.pos_id === posId) {
+                                closedPos = p;
                             } else {
-                                p.tp_price = body.clear ? null : parseFloat(body.price);
-                                if (p.tranches && p.tranches.queen) p.tranches.queen.tp_price = p.tp_price;
+                                remaining.push(p);
                             }
-                            break;
                         }
-                    }
-                    savePortfolio(st);
-                    return new Response(JSON.stringify({ status: "SUCCESS" }), {
-                        status: 200,
-                        headers: { "Content-Type": "application/json" }
-                    });
-                }
 
-                // 8. /api/order/breakeven
-                if (url.includes("/api/order/breakeven")) {
-                    const body = JSON.parse(init?.body || "{}");
-                    const st = loadPortfolio();
-                    for (const p of st.active_positions) {
-                        if (p.pos_id === body.pos_id) {
-                            const pip = CONTRACT_SPECS[p.symbol]?.pip_val || 0.1;
-                            if (p.side === "BUY") {
-                                p.sl_price = Math.round((p.entry_price + (2 * pip)) * 100) / 100;
-                            } else {
-                                p.sl_price = Math.round((p.entry_price - (2 * pip)) * 100) / 100;
-                            }
-                            p.is_risk_free = true;
-                            break;
-                        }
-                    }
-                    savePortfolio(st);
-                    return new Response(JSON.stringify({ status: "SUCCESS", message: "Position locked to breakeven" }), {
-                        status: 200,
-                        headers: { "Content-Type": "application/json" }
-                    });
-                }
-
-                // 9. /api/order/batch_close
-                if (url.includes("/api/order/batch_close")) {
-                    const body = JSON.parse(init?.body || "{}");
-                    const filter = body.filter || "ALL";
-                    const st = loadPortfolio();
-                    const active = st.active_positions || [];
-                    const remaining = [];
-
-                    for (const p of active) {
-                        const pnl = p.unrealized_pnl || 0.0;
-                        const match = (filter === "ALL") || (filter === "PROFIT" && pnl > 0) || (filter === "LOSS" && pnl < 0);
-                        if (match) {
+                        if (closedPos) {
+                            const pnl = closedPos.unrealized_pnl || 0.0;
                             let vaultSweep = 0;
                             if (pnl > 0) {
                                 vaultSweep = Math.round(pnl * 0.20 * 100) / 100;
@@ -635,27 +558,164 @@
                             st.stats.decided_win_rate_pct = decided > 0 ? Math.round((st.stats.wins / decided * 1000) / 10) : 100.0;
 
                             st.closed_trades.unshift({
-                                pos_id: p.pos_id,
-                                symbol: p.symbol,
-                                side: p.side,
-                                volume_lots: p.volume_lots,
-                                entry_time: p.entry_time,
+                                pos_id: closedPos.pos_id,
+                                symbol: closedPos.symbol,
+                                side: closedPos.side,
+                                volume_lots: closedPos.volume_lots,
+                                entry_time: closedPos.entry_time,
                                 closed_time: new Date().toLocaleTimeString(),
-                                entry_price: p.entry_price,
-                                close_price: p.current_price,
-                                sl_price: p.sl_price,
-                                tp_price: p.tp_price,
-                                total_fee: p.fee,
+                                entry_price: closedPos.entry_price,
+                                close_price: closedPos.current_price,
+                                sl_price: closedPos.sl_price,
+                                tp_price: closedPos.tp_price,
+                                total_fee: closedPos.fee,
                                 swap: 0.0,
                                 final_net_pnl: pnl,
-                                exit_reason: "Batch Close"
+                                exit_reason: "Manual Close"
                             });
-                        } else {
-                            remaining.push(p);
+                            st.active_positions = remaining;
+                            savePortfolio(st, isLive);
+                            return new Response(JSON.stringify({ status: "SUCCESS", message: "Position closed" }), {
+                                status: 200,
+                                headers: { "Content-Type": "application/json" }
+                            });
                         }
                     }
-                    st.active_positions = remaining;
-                    savePortfolio(st);
+                    return new Response(JSON.stringify({ status: "ERROR", message: "Position not found" }), {
+                        status: 404,
+                        headers: { "Content-Type": "application/json" }
+                    });
+                }
+
+                // 7. /api/order/edit_sltp
+                if (url.includes("/api/order/edit_sltp")) {
+                    const body = JSON.parse(init?.body || "{}");
+                    const posId = body.pos_id;
+                    let found = false;
+                    for (const isLive of [true, false]) {
+                        const st = loadPortfolio(isLive);
+                        for (const p of (st.active_positions || [])) {
+                            if (p.pos_id === posId) {
+                                if (body.type === "SL") {
+                                    p.sl_price = body.clear ? null : parseFloat(body.price);
+                                } else {
+                                    p.tp_price = body.clear ? null : parseFloat(body.price);
+                                    if (p.tranches && p.tranches.queen) p.tranches.queen.tp_price = p.tp_price;
+                                }
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found) {
+                            savePortfolio(st, isLive);
+                            break;
+                        }
+                    }
+                    return new Response(JSON.stringify({ status: "SUCCESS", pos_id: posId, type: body.type, price: body.price }), {
+                        status: 200,
+                        headers: { "Content-Type": "application/json" }
+                    });
+                }
+
+                // 8. /api/order/breakeven
+                if (url.includes("/api/order/breakeven")) {
+                    const body = JSON.parse(init?.body || "{}");
+                    const posId = body.pos_id;
+                    let found = false;
+                    for (const isLive of [true, false]) {
+                        const st = loadPortfolio(isLive);
+                        for (const p of (st.active_positions || [])) {
+                            if (p.pos_id === posId) {
+                                const pip = CONTRACT_SPECS[p.symbol]?.pip_val || 0.1;
+                                if (p.side === "BUY" || p.side === "LONG") {
+                                    p.sl_price = Math.round((p.entry_price + (2 * pip)) * 100) / 100;
+                                } else {
+                                    p.sl_price = Math.round((p.entry_price - (2 * pip)) * 100) / 100;
+                                }
+                                p.is_risk_free = true;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found) {
+                            savePortfolio(st, isLive);
+                            break;
+                        }
+                    }
+                    return new Response(JSON.stringify({ status: "SUCCESS", message: "Position locked to breakeven" }), {
+                        status: 200,
+                        headers: { "Content-Type": "application/json" }
+                    });
+                }
+
+                // 9. /api/order/cancel_pending
+                if (url.includes("/api/order/cancel_pending")) {
+                    const body = JSON.parse(init?.body || "{}");
+                    const orderNo = String(body.order_no || "");
+                    for (const isLive of [true, false]) {
+                        const st = loadPortfolio(isLive);
+                        st.pending_orders = (st.pending_orders || []).filter(o => String(o.order_no) !== orderNo);
+                        savePortfolio(st, isLive);
+                    }
+                    return new Response(JSON.stringify({ status: "SUCCESS", message: `Order #${orderNo} cancelled` }), {
+                        status: 200,
+                        headers: { "Content-Type": "application/json" }
+                    });
+                }
+
+                // 10. /api/order/batch_close
+                if (url.includes("/api/order/batch_close")) {
+                    const body = JSON.parse(init?.body || "{}");
+                    const filter = body.filter || "ALL";
+                    for (const isLive of [true, false]) {
+                        const st = loadPortfolio(isLive);
+                        const active = st.active_positions || [];
+                        const remaining = [];
+
+                        for (const p of active) {
+                            const pnl = p.unrealized_pnl || 0.0;
+                            const match = (filter === "ALL") || (filter === "PROFIT" && pnl > 0) || (filter === "LOSS" && pnl < 0);
+                            if (match) {
+                                let vaultSweep = 0;
+                                if (pnl > 0) {
+                                    vaultSweep = Math.round(pnl * 0.20 * 100) / 100;
+                                    st.safe_vault = Math.round((st.safe_vault + vaultSweep) * 100) / 100;
+                                    st.wallet_balance = Math.round((st.wallet_balance + pnl - vaultSweep) * 100) / 100;
+                                } else {
+                                    st.wallet_balance = Math.round((st.wallet_balance + pnl) * 100) / 100;
+                                }
+                                st.session_pnl = Math.round((st.session_pnl + pnl) * 100) / 100;
+                                st.total_equity = Math.round((st.wallet_balance + st.safe_vault) * 100) / 100;
+                                st.stats.total_trades++;
+                                if (pnl > 0) st.stats.wins++;
+                                else if (pnl < 0) st.stats.losses++;
+                                else st.stats.breakevens++;
+                                const decided = st.stats.wins + st.stats.losses;
+                                st.stats.decided_win_rate_pct = decided > 0 ? Math.round((st.stats.wins / decided * 1000) / 10) : 100.0;
+
+                                st.closed_trades.unshift({
+                                    pos_id: p.pos_id,
+                                    symbol: p.symbol,
+                                    side: p.side,
+                                    volume_lots: p.volume_lots,
+                                    entry_time: p.entry_time,
+                                    closed_time: new Date().toLocaleTimeString(),
+                                    entry_price: p.entry_price,
+                                    close_price: p.current_price,
+                                    sl_price: p.sl_price,
+                                    tp_price: p.tp_price,
+                                    total_fee: p.fee,
+                                    swap: 0.0,
+                                    final_net_pnl: pnl,
+                                    exit_reason: "Batch Close"
+                                });
+                            } else {
+                                remaining.push(p);
+                            }
+                        }
+                        st.active_positions = remaining;
+                        savePortfolio(st, isLive);
+                    }
                     return new Response(JSON.stringify({ status: "SUCCESS" }), {
                         status: 200,
                         headers: { "Content-Type": "application/json" }
@@ -1340,19 +1400,6 @@
             </div>
         </section>
 
-    </div>
-
-    <!-- Right-side TP/SL action buttons -->
-    <div id="elb-bar">
-        <button id="elb-btn-tp" class="elb-btn elb-btn-tp" data-level="TP" draggable="true" title="Drag to set Take Profit">TP</button>
-        <button id="elb-btn-sl" class="elb-btn elb-btn-sl" data-level="SL" draggable="true" title="Drag to set Stop Loss">SL</button>
-    </div>
-    <!-- One immediate action per visible chart line. Entry closes the position;
-         SL/TP remove only that corresponding protective order. -->
-    <div id="line-close-controls" aria-label="Chart line actions">
-        <button id="line-close-entry" class="line-close-btn line-close-entry" title="Close position now">×</button>
-        <button id="line-close-sl" class="line-close-btn line-close-sl" title="Remove stop loss">×</button>
-        <button id="line-close-tp" class="line-close-btn line-close-tp" title="Remove take profit">×</button>
     </div>
 
     <!-- Trade W Stop Loss / Take Profit Floating Edit Modal -->
