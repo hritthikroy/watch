@@ -1,10 +1,10 @@
-# MT4 Web Execution Terminal
+# Watch WebTrader
 
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-WebTrader-orange.svg)](https://github.com/hritthikroy/mt4-web-terminal)
+[![Platform](https://img.shields.io/badge/Platform-Watch%20WebTrader-0ECB81.svg)](https://github.com/hritthikroy/watch)
 
-A modular, high-speed WebTrader execution terminal engineered for cryptocurrency perpetual markets. Built for low-latency market visualization, on-chart drag-and-drop order placement, and live WebSocket trade stream processing.
+A modular, high-speed institutional WebTrader execution terminal engineered for cryptocurrency perpetual markets. Built by **Watch**, featuring sub-millisecond market visualization, on-chart interactive order placement, and live WebSocket trade stream processing.
 
 ---
 
@@ -21,7 +21,7 @@ A modular, high-speed WebTrader execution terminal engineered for cryptocurrency
 ## Architecture Overview
 
 ```
-mt4-web-terminal/
+watch/
 ├── binance_mt4_web_terminal.py   # Main server entry point
 ├── build_terminal_bundle.py      # Client module bundler
 ├── requirements.txt              # Core dependencies
@@ -51,8 +51,8 @@ mt4-web-terminal/
 ### 2. Installation
 Clone the repository and install dependencies:
 ```bash
-git clone https://github.com/hritthikroy/mt4-web-terminal.git
-cd mt4-web-terminal
+git clone https://github.com/hritthikroy/watch.git
+cd watch
 pip install -r requirements.txt
 ```
 
@@ -69,6 +69,9 @@ http://127.0.0.1:5000/demo
 ```
 
 ---
+
+## Company
+**Watch** &mdash; Professional Crypto Market Execution & Trading Systems.
 
 ## License
 MIT License. Open for development and integration.
