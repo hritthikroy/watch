@@ -12,8 +12,14 @@ Core logic is partitioned into clean, professional modules under server/:
 """
 
 import sys
+import os
 import logging
 from pathlib import Path
+
+# Add core systems to sys.path
+for p in [r"c:\tradebot\BINANCE_SYSTEM\core", r"c:\tradebot"]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 # Silence noisy loggers
 logging.basicConfig(level=logging.ERROR)
